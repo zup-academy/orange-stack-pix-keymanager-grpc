@@ -2,18 +2,33 @@ package br.com.zup.pix.chaves
 
 import javax.persistence.Column
 import javax.persistence.Embeddable
+import javax.validation.constraints.NotBlank
+import javax.validation.constraints.Size
+import kotlin.math.max
 
 @Embeddable
 class ContaAssociada(
-        @Column(name = "conta_instituicao")
+        @field:NotBlank
+        @Column(name = "conta_instituicao", nullable = false)
         val instituicao: String,
-        @Column(name = "conta_titular_nome")
+
+        @field:NotBlank
+        @Column(name = "conta_titular_nome", nullable = false)
         val nomeDoTitular: String,
-        @Column(name = "conta_titular_cpf", length = 11)
+
+        @field:NotBlank
+        @field:Size(max = 11)
+        @Column(name = "conta_titular_cpf", length = 11, nullable = false)
         val cpfDoTitular: String,
-        @Column(name = "conta_agencia", length = 4)
+
+        @field:NotBlank
+        @field:Size(max = 4)
+        @Column(name = "conta_agencia", length = 4, nullable = false)
         val agencia: String,
-        @Column(name = "conta_numero", length = 6)
+
+        @field:NotBlank
+        @field:Size(max = 6)
+        @Column(name = "conta_numero", length = 6, nullable = false)
         val numeroDaConta: String
 ) {
 

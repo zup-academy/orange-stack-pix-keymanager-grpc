@@ -39,7 +39,7 @@ class KeyManagerEndpoint(
         val chave = ChavePix(
             clienteId = UUID.fromString(request.clienteId),
             tipo = TipoDeChave.valueOf(request.tipoDeChave.name),
-            chave = request.chave,
+            chave = if (request.tipoDeChave == br.com.zup.edu.grpc.TipoDeChave.ALEATORIA) UUID.randomUUID().toString() else request.chave,
             tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name),
             conta = conta
         )

@@ -7,17 +7,22 @@ import br.com.zup.edu.chaves.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import br.com.zup.pix.chaves.ChavePix
+import com.google.protobuf.Any
+import com.google.rpc.BadRequest
+import com.google.rpc.Code
 import io.grpc.Status
+import io.grpc.protobuf.StatusProto
 import io.grpc.stub.StreamObserver
 import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
+import javax.persistence.PersistenceException
+import javax.validation.ConstraintViolationException
 
 @Singleton
 class KeyManagerEndpoint(
-    @Inject val itauClient: ContasDeClientesNoItauClient,
-    @Inject val repository: ChavePixRepository,
+    @Inject val service: NovaChavePixService,
 ) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() {
 
     override fun registra(
@@ -25,39 +30,60 @@ class KeyManagerEndpoint(
         responseObserver: StreamObserver<RegistraChavePixResponse>
     ) {
 
-        /**
-         * 1. buscar dados da conta no ERP-ITAU
-         * 2. gravar no banco de dados
-         * 3. retornar resultado
-         */
-
-        // 1. buscar dados da conta no ERP-ITAU
-
-        val response = itauClient.buscaContaPorTipo(request.clienteId, request.tipoDeConta.name)
-        val conta = response.body()?.toModel() ?: throw IllegalStateException("Cliente não encontrado no Itau")
-
-        // 2. gravar no banco de dados
-        val chave = ChavePix(
-            clienteId = UUID.fromString(request.clienteId),
+        val novaChave = NovaChavePix(
+            clienteId = request.clienteId,
             tipo = TipoDeChave.valueOf(request.tipoDeChave.name),
-            chave = if (request.tipoDeChave == br.com.zup.edu.grpc.TipoDeChave.ALEATORIA) UUID.randomUUID().toString() else request.chave,
-            tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name),
-            conta = conta
+            chave = request.chave,
+            tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name)
         )
 
         try {
-            repository.save(chave)
+            val chaveCriada = service.registra(novaChave)
 
-            // 3. retornar resultado com pixId
             responseObserver.onNext(RegistraChavePixResponse.newBuilder()
-                                        .setClienteId(chave.clienteId.toString())
-                                        .setPixId(chave.id.toString())
-                                        .build())
+                                                .setClienteId(chaveCriada.clienteId.toString())
+                                                .setPixId(chaveCriada.id.toString())
+                                                .build())
 
             responseObserver.onCompleted()
 
-        } catch (e: Throwable) {
+        } catch (e: ConstraintViolationException) {
+
+            e.printStackTrace()
+
+            val details = BadRequest.newBuilder()
+                .addAllFieldViolations(e.constraintViolations.map {
+                    BadRequest.FieldViolation.newBuilder()
+                        .setField(it.propertyPath.toString()) // TODO: melhorada!
+                        .setDescription(it.message)
+                        .build()
+                })
+                .build()
+
+            val statusProto = com.google.rpc.Status.newBuilder()
+                .setCode(Code.INVALID_ARGUMENT.number)
+                .setMessage("Dados inválidos")
+                .addDetails(Any.pack(details))
+                .build()
+
+            responseObserver?.onError(StatusProto.toStatusRuntimeException(statusProto))
+
+        } catch (e: PersistenceException) {
+
+//            org.hibernate.exception.ConstraintViolationException
+            e.printStackTrace()
+
             val error = Status.INVALID_ARGUMENT
+                            .withDescription("chave Pix existente")
+                            .asRuntimeException()
+
+            responseObserver?.onError(error)
+
+        } catch (e: Throwable) {
+
+            e.printStackTrace()
+
+            val error = Status.INTERNAL
                             .withDescription(e.message)
                             .withCause(e)
                             .asRuntimeException()

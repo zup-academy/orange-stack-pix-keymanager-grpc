@@ -7,6 +7,7 @@ import br.com.zup.edu.chaves.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import br.com.zup.pix.chaves.ChavePix
+import io.grpc.Status
 import io.grpc.stub.StreamObserver
 import java.lang.IllegalStateException
 import java.util.*
@@ -44,14 +45,24 @@ class KeyManagerEndpoint(
             conta = conta
         )
 
-        // 3. retornar resultado
-        repository.save(chave)
+        try {
+            repository.save(chave)
 
-        // 4. retornar resultado com pixId
-        responseObserver.onNext(RegistraChavePixResponse.newBuilder()
-                                            .setClienteId(chave.clienteId.toString())
-                                            .setPixId(chave.id.toString())
-                                            .build())
-        responseObserver.onCompleted()
+            // 3. retornar resultado com pixId
+            responseObserver.onNext(RegistraChavePixResponse.newBuilder()
+                                        .setClienteId(chave.clienteId.toString())
+                                        .setPixId(chave.id.toString())
+                                        .build())
+
+            responseObserver.onCompleted()
+
+        } catch (e: Throwable) {
+            val error = Status.INVALID_ARGUMENT
+                            .withDescription(e.message)
+                            .withCause(e)
+                            .asRuntimeException()
+
+            responseObserver?.onError(error)
+        }
     }
 }

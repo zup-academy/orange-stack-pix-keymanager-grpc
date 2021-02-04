@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_outer_classname = "KeymanagerGrpc";
+
+package br.com.zup.edu.grpc;
+
+service KeymanagerGrpcService {
+
+  rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
+}
+
+enum TipoDeChave {
+  CPF       = 0;
+  CELULAR   = 1;
+  EMAIL     = 2;
+  ALEATORIA = 3;
+}
+
+enum TipoDeConta {
+  CONTA_CORRENTE = 0;
+  CONTA_POUPANCA = 1;
+}
+
+message RegistraChavePixRequest {
+  string clienteId        = 1;
+  TipoDeChave tipoDeChave = 2;
+  string chave            = 3;
+  TipoDeConta tipoDeConta = 4;
+}
+
+message RegistraChavePixResponse {
+  string clienteId = 1;
+  string pixId     = 2;
+}

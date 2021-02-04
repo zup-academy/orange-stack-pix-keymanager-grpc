@@ -1,0 +1,6 @@
+applicationType: grpc
+defaultPackage: br.com.zup.edu
+testFramework: junit
+sourceLanguage: kotlin
+buildTool: gradle
+features: [annotation-api, app-name, data, data-jpa, gradle, grpc, hibernate-validator, http-client, jdbc-hikari, junit, kotlin, kotlin-application, logback, postgres, readme, shade, testcontainers, yaml]

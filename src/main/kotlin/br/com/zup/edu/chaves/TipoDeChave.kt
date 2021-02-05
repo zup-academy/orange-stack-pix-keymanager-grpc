@@ -6,17 +6,32 @@ import org.hibernate.validator.internal.constraintvalidators.hv.br.CPFValidator
 enum class TipoDeChave {
 
     CPF {
-        override fun valida(chave: String) = CPFValidator().isValid(chave, null)
+        override fun valida(chave: String?): Boolean {
+            if (chave == null || chave.isBlank()) {
+                return false
+            }
+            return CPFValidator().isValid(chave, null)
+        }
     },
     CELULAR {
-        override fun valida(chave: String) = chave.matches("^\\+[1-9][0-9]\\d{1,14}\$".toRegex())
+        override fun valida(chave: String?): Boolean {
+            if (chave == null || chave.isBlank()) {
+                return false
+            }
+            return chave.matches("^\\+[1-9][0-9]\\d{1,14}\$".toRegex())
+        }
     },
     EMAIL {
-        override fun valida(chave: String) = EmailValidator().isValid(chave, null)
+        override fun valida(chave: String?): Boolean {
+            if (chave == null || chave.isBlank()) {
+                return false
+            }
+            return EmailValidator().isValid(chave, null)
+        }
     },
     ALEATORIA {
-        override fun valida(chave: String) = chave == null || chave.isBlank()
+        override fun valida(chave: String?) = chave == null || chave.isBlank() // não deve se preenchida
     };
 
-    abstract fun valida(chave: String): Boolean
+    abstract fun valida(chave: String?): Boolean
 }

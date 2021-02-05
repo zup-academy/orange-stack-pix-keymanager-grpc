@@ -1,6 +1,5 @@
 package br.com.zup.pix.chaves
 
-import br.com.zup.edu.shared.validation.ValidPixKey
 import java.time.LocalDateTime
 import java.util.*
 import javax.persistence.*

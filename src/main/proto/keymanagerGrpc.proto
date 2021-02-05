@@ -10,6 +10,9 @@ service KeymanagerGrpcService {
   rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
 }
 
+/**
+ * Se nenhum tipo for especificado, assume-se o tipo de chave CPF.
+ */
 enum TipoDeChave {
   CPF       = 0;
   CELULAR   = 1;
@@ -17,6 +20,9 @@ enum TipoDeChave {
   ALEATORIA = 3;
 }
 
+/**
+ * Se nenhum tipo for especificado, assume-se o tipo de conta CONTA_CORRENTE.
+ */
 enum TipoDeConta {
   CONTA_CORRENTE = 0;
   CONTA_POUPANCA = 1;

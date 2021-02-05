@@ -17,7 +17,7 @@ import kotlin.reflect.KClass
 @Retention(RUNTIME)
 @Constraint(validatedBy = [ValidPixKeyValidator::class])
 annotation class ValidPixKey(
-    val message: String = "chave Pix inválida",
+    val message: String = "chave Pix inválida (\${validatedValue.tipo})",
     val groups: Array<KClass<Any>> = [],
     val payload: Array<KClass<Payload>> = [],
 )
@@ -32,11 +32,7 @@ class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, NovaChavePix> {
         context: ConstraintValidatorContext,
     ): Boolean {
 
-        if (value?.chave == null || value.chave.isBlank()) {
-            return false
-        }
-
-        if (value.tipo == null) {
+        if (value?.tipo == null) {
             return false
         }
 

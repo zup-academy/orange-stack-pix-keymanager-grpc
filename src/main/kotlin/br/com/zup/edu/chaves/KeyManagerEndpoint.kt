@@ -1,8 +1,6 @@
 package br.com.zup.edu.chaves
 
-import br.com.zup.edu.grpc.KeymanagerGrpcServiceGrpc
-import br.com.zup.edu.grpc.RegistraChavePixRequest
-import br.com.zup.edu.grpc.RegistraChavePixResponse
+import br.com.zup.edu.grpc.*
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import com.google.protobuf.Any
@@ -50,14 +48,14 @@ class KeyManagerEndpoint(
             val details = BadRequest.newBuilder()
                 .addAllFieldViolations(e.constraintViolations.map {
                     BadRequest.FieldViolation.newBuilder()
-                        .setField(it.propertyPath.toString()) // TODO: melhorada!
+                        .setField(it.propertyPath.last().name)
                         .setDescription(it.message)
                         .build()
                 })
                 .build()
 
             val statusProto = com.google.rpc.Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT.number)
+                .setCode(Code.INVALID_ARGUMENT_VALUE)
                 .setMessage("Dados inválidos")
                 .addDetails(Any.pack(details))
                 .build()
@@ -87,4 +85,45 @@ class KeyManagerEndpoint(
             responseObserver?.onError(error)
         }
     }
+
+    override fun remove(request: RemoveChavePixRequest, responseObserver: StreamObserver<RemoveChavePixResponse>) {
+        try {
+            service.remove(clienteId = request.clienteId, pixId = request.pixId)
+
+            responseObserver.onNext(RemoveChavePixResponse.newBuilder()
+                                                .setClienteId(request.clienteId)
+                                                .setPixId(request.pixId)
+                                                .build())
+            responseObserver.onCompleted()
+
+        } catch (e: ConstraintViolationException) {
+
+            e.printStackTrace()
+
+            val details = BadRequest.newBuilder()
+                            .addAllFieldViolations(e.constraintViolations.map {
+                                BadRequest.FieldViolation.newBuilder()
+                                    .setField(it.propertyPath.last().name)
+                                    .setDescription(it.message)
+                                    .build()
+                            })
+                            .build()
+
+            val statusProto = com.google.rpc.Status.newBuilder()
+                                    .setCode(Code.INVALID_ARGUMENT_VALUE)
+                                    .setMessage("Dados inválidos")
+                                    .addDetails(Any.pack(details))
+                                    .build()
+
+            responseObserver?.onError(StatusProto.toStatusRuntimeException(statusProto))
+
+        } catch (e: Throwable) {
+            e.printStackTrace()
+            responseObserver.onError(Status.INTERNAL
+                                        .withDescription(e.message)
+                                        .withCause(e)
+                                        .asRuntimeException())
+        }
+    }
+
 }

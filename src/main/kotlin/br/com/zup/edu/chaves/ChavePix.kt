@@ -42,4 +42,9 @@ class ChavePix(
                 return "ChavePix(clienteId=$clienteId, tipo=$tipo, chave='$chave', tipoDeConta=$tipoDeConta, conta=$conta, id=$id, criadaEm=$criadaEm)"
         }
 
+        /**
+         * Verifica se esta chave pertence a este cliente
+         */
+        fun pertenceAo(clienteId: UUID) = this.clienteId.equals(clienteId)
+
 }

@@ -1,6 +1,7 @@
 package br.com.zup.edu.chaves
 
 import br.com.zup.edu.shared.validation.ValidPixKey
+import br.com.zup.edu.shared.validation.ValidUUID
 import br.com.zup.pix.chaves.ChavePix
 import br.com.zup.pix.chaves.ContaAssociada
 import br.com.zup.pix.chaves.TipoDeChave
@@ -14,6 +15,7 @@ import javax.validation.constraints.Size
 @ValidPixKey
 @Introspected
 data class NovaChavePix(
+    @ValidUUID
     @field:NotBlank
     val clienteId: String?,
     @field:NotNull
@@ -33,4 +35,5 @@ data class NovaChavePix(
             conta = conta
         )
     }
+
 }

@@ -8,6 +8,9 @@ package br.com.zup.edu.grpc;
 service KeymanagerGrpcService {
 
   rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
+
+  rpc remove(RemoveChavePixRequest) returns (RemoveChavePixResponse) {}
+
 }
 
 /**
@@ -36,6 +39,16 @@ message RegistraChavePixRequest {
 }
 
 message RegistraChavePixResponse {
+  string clienteId = 1;
+  string pixId     = 2;
+}
+
+message RemoveChavePixRequest {
+  string clienteId = 1;
+  string pixId     = 2;
+}
+
+message RemoveChavePixResponse {
   string clienteId = 1;
   string pixId     = 2;
 }

@@ -8,7 +8,6 @@ import javax.validation.Valid
 import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
-@ValidPixKey
 @Entity
 class ChavePix(
         @field:NotNull

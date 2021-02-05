@@ -15,7 +15,7 @@ enum class TipoDeChave {
         override fun valida(chave: String) = EmailValidator().isValid(chave, null)
     },
     ALEATORIA {
-        override fun valida(chave: String) = true
+        override fun valida(chave: String) = chave == null || chave.isBlank()
     };
 
     abstract fun valida(chave: String): Boolean

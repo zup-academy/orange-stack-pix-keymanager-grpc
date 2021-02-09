@@ -10,7 +10,15 @@ enum class TipoDeChave {
             if (chave == null || chave.isBlank()) {
                 return false
             }
-            return CPFValidator().isValid(chave, null)
+
+            if (!chave.matches("[0-9]+".toRegex())) {
+                return false
+            }
+
+            return CPFValidator().run {
+                initialize(null)
+                isValid(chave, null)
+            }
         }
     },
     CELULAR {
@@ -26,7 +34,10 @@ enum class TipoDeChave {
             if (chave == null || chave.isBlank()) {
                 return false
             }
-            return EmailValidator().isValid(chave, null)
+            return EmailValidator().run {
+                initialize(null)
+                isValid(chave, null)
+            }
         }
     },
     ALEATORIA {

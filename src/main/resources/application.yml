@@ -24,3 +24,7 @@ jpa.default.properties.hibernate.format_sql: true
 itau:
   contas:
     url: 'http://localhost:9091'
+
+bcb:
+  pix:
+    url: 'http://localhost:8082'

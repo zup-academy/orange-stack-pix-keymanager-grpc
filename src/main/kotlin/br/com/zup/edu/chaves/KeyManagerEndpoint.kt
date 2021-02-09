@@ -7,12 +7,14 @@ import com.google.protobuf.Any
 import com.google.rpc.BadRequest
 import com.google.rpc.Code
 import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import io.grpc.protobuf.StatusProto
 import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.PersistenceException
 import javax.validation.ConstraintViolationException
+import org.hibernate.exception.ConstraintViolationException as DatabaseConstraintError
 
 @Singleton
 class KeyManagerEndpoint(
@@ -44,45 +46,19 @@ class KeyManagerEndpoint(
         } catch (e: ConstraintViolationException) {
 
             e.printStackTrace()
-
-            val details = BadRequest.newBuilder()
-                .addAllFieldViolations(e.constraintViolations.map {
-                    BadRequest.FieldViolation.newBuilder()
-                        .setField(it.propertyPath.last().name)
-                        .setDescription(it.message)
-                        .build()
-                })
-                .build()
-
-            val statusProto = com.google.rpc.Status.newBuilder()
-                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                .setMessage("Dados inválidos")
-                .addDetails(Any.pack(details))
-                .build()
-
-            responseObserver?.onError(StatusProto.toStatusRuntimeException(statusProto))
+            responseObserver.onError(handleInvalidArguments(e))
 
         } catch (e: PersistenceException) {
 
-//            org.hibernate.exception.ConstraintViolationException
             e.printStackTrace()
-
-            val error = Status.INVALID_ARGUMENT
-                            .withDescription("chave Pix existente")
-                            .asRuntimeException()
-
-            responseObserver?.onError(error)
+            responseObserver.onError(handlePersistenceException(e))
 
         } catch (e: Throwable) {
-
             e.printStackTrace()
-
-            val error = Status.INTERNAL
-                            .withDescription(e.message)
-                            .withCause(e)
-                            .asRuntimeException()
-
-            responseObserver?.onError(error)
+            responseObserver.onError(Status.INTERNAL
+                                        .withDescription(e.message)
+                                        .withCause(e)
+                                        .asRuntimeException())
         }
     }
 
@@ -99,23 +75,7 @@ class KeyManagerEndpoint(
         } catch (e: ConstraintViolationException) {
 
             e.printStackTrace()
-
-            val details = BadRequest.newBuilder()
-                            .addAllFieldViolations(e.constraintViolations.map {
-                                BadRequest.FieldViolation.newBuilder()
-                                    .setField(it.propertyPath.last().name)
-                                    .setDescription(it.message)
-                                    .build()
-                            })
-                            .build()
-
-            val statusProto = com.google.rpc.Status.newBuilder()
-                                    .setCode(Code.INVALID_ARGUMENT_VALUE)
-                                    .setMessage("Dados inválidos")
-                                    .addDetails(Any.pack(details))
-                                    .build()
-
-            responseObserver?.onError(StatusProto.toStatusRuntimeException(statusProto))
+            responseObserver.onError(handleInvalidArguments(e))
 
         } catch (e: Throwable) {
             e.printStackTrace()
@@ -126,4 +86,37 @@ class KeyManagerEndpoint(
         }
     }
 
+    private fun handlePersistenceException(e: PersistenceException): StatusRuntimeException {
+        return when (e.cause) {
+            is DatabaseConstraintError -> Status.INVALID_ARGUMENT
+                                                .withDescription("chave Pix existente")
+                                                .asRuntimeException()
+            else -> Status.INTERNAL
+                          .withDescription(e.message)
+                          .withCause(e)
+                          .asRuntimeException()
+        }
+    }
+
+    private fun handleInvalidArguments(e: ConstraintViolationException): StatusRuntimeException {
+
+        val details = BadRequest.newBuilder()
+            .addAllFieldViolations(e.constraintViolations.map {
+                BadRequest.FieldViolation.newBuilder()
+                    .setField(it.propertyPath.last().name ?: "chave")
+                    .setDescription(it.message)
+                    .build()
+            })
+            .build()
+
+        val statusProto = com.google.rpc.Status.newBuilder()
+                                .setCode(Code.INVALID_ARGUMENT_VALUE)
+                                .setMessage("Dados inválidos")
+                                .addDetails(Any.pack(details))
+                                .build()
+
+        return StatusProto.toStatusRuntimeException(statusProto)
+    }
+
 }
+

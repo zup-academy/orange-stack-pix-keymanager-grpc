@@ -20,7 +20,7 @@ class ChavePix(
 
         @field:NotBlank
         @Column(unique = true, nullable = false)
-        val chave: String,
+        var chave: String,
 
         @field:NotNull
         @Enumerated(EnumType.STRING)
@@ -46,5 +46,12 @@ class ChavePix(
          * Verifica se esta chave pertence a este cliente
          */
         fun pertenceAo(clienteId: UUID) = this.clienteId.equals(clienteId)
+
+        /**
+         * Verifica se é chave uma aleatória
+         */
+        fun isAleatoria(): Boolean {
+                return tipo == TipoDeChave.ALEATORIA
+        }
 
 }

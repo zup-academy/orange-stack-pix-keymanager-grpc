@@ -1,9 +1,16 @@
 package br.com.zup.edu.chaves
 
+import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
+import br.com.zup.edu.chaves.integration.bcb.CreatePixKeyRequest
+import br.com.zup.edu.chaves.integration.bcb.DeletePixKeyRequest
+import br.com.zup.edu.chaves.integration.bcb.PixKeyType
 import br.com.zup.edu.chaves.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.edu.shared.validation.ValidUUID
 import br.com.zup.pix.chaves.ChavePix
+import br.com.zup.pix.chaves.ContaAssociada
+import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
+import org.slf4j.LoggerFactory
 import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
@@ -15,27 +22,44 @@ import javax.validation.constraints.NotBlank
 @Validated
 @Singleton
 class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
-                          @Inject val repository: ChavePixRepository,) {
+                          @Inject val repository: ChavePixRepository,
+                          @Inject val bcbClient: BancoCentralClient,) {
 
+    private val LOGGER = LoggerFactory.getLogger(this::class.java)
 
     @Transactional
     fun registra(@Valid novaChave: NovaChavePix): ChavePix {
 
-        /**
-         * 1. buscar dados da conta no ERP-ITAU
-         * 2. gravar no banco de dados
-         * 3. retornar resultado
-         */
+        // 1. verifica se chave já existe no sistema
+        if (repository.existsByChave(novaChave.chave))
+            throw IllegalArgumentException("Chave Pix '${novaChave.chave}' existente")
 
-        // 1. buscar dados da conta no ERP-ITAU
+        // 2. busca dados da conta no ERP do ITAU
         val response = itauClient.buscaContaPorTipo(novaChave.clienteId!!, novaChave.tipoDeConta!!.name)
         val conta = response.body()?.toModel() ?: throw IllegalStateException("Cliente não encontrado no Itau")
 
-        // 2. gravar no banco de dados
+        // 3. grava no banco de dados
         val chave = novaChave.toModel(conta)
-        return repository.save(chave)
+        repository.save(chave)
+
+        // 4. registra chave no BCB
+        val bcbRequest = CreatePixKeyRequest.of(chave).also {
+            LOGGER.info("Registrando chave Pix no Banco Central do Brasil (BCB): $it")
+        }
+
+        val bcbResponse = bcbClient.create(bcbRequest)
+        if (bcbResponse.status != HttpStatus.CREATED)
+            throw IllegalStateException("Erro ao registrar chave Pix no Banco Central do Brasil (BCB)")
+
+        // 5. atualiza chave do dominio com chave gerada pelo BCB
+        if (chave.isAleatoria()) {
+            chave.chave = bcbResponse.body()!!.key
+        }
+
+        return chave
     }
 
+    @Transactional
     fun remove(
         @NotBlank @ValidUUID(message = "cliente ID com formato inválido") clienteId: String?,
         @NotBlank @ValidUUID(message = "pix ID com formato inválido") pixId: String?,
@@ -52,5 +76,15 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
         }
 
         repository.deleteById(uuidPixId)
+
+        val request = DeletePixKeyRequest(
+            key = chave.chave,
+            participant = ContaAssociada.ITAU_UNIBANCO_ISPB
+        )
+
+        val bcbResponse = bcbClient.delete(key = chave.chave, request = request)
+        if (bcbResponse.status != HttpStatus.OK) {
+            throw IllegalStateException("Erro ao remover chave Pix no Banco Central do Brasil (BCB)")
+        }
     }
 }

@@ -1,15 +1,20 @@
 package br.com.zup.edu.chaves
 
 import br.com.zup.edu.grpc.*
+import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
+import br.com.zup.pix.chaves.ChavePix
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import com.google.protobuf.Any
+import com.google.protobuf.Timestamp
 import com.google.rpc.BadRequest
 import com.google.rpc.Code
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.grpc.protobuf.StatusProto
 import io.grpc.stub.StreamObserver
+import java.time.ZoneId
+import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
 import javax.persistence.PersistenceException
@@ -19,6 +24,7 @@ import org.hibernate.exception.ConstraintViolationException as DatabaseConstrain
 @Singleton
 class KeyManagerEndpoint(
     @Inject val service: NovaChavePixService,
+    @Inject val repository: ChavePixRepository,
 ) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() {
 
     override fun registra(
@@ -83,6 +89,77 @@ class KeyManagerEndpoint(
                                         .withDescription(e.message)
                                         .withCause(e)
                                         .asRuntimeException())
+        }
+    }
+
+    override fun carrega(
+        request: CarregaChavePixRequest,
+        responseObserver: StreamObserver<CarregaChavePixResponse>,
+    ) {
+
+        if (request.clienteId.isNullOrBlank()) {
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                                        .withDescription("Identificador do cliente deve ser informado")
+                                        .asRuntimeException());
+            return
+        }
+
+        if (request.pixId.isNullOrBlank() && request.chave.isNullOrBlank()) {
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                                        .withDescription("Pix ID ou Chave deve ser informado")
+                                        .asRuntimeException());
+            return
+        }
+
+        val chave = when (request.filtroCase) {
+            PIXID -> repository.findById(UUID.fromString(request.pixId))
+            CHAVE -> repository.findByChave(request.chave)
+            FILTRO_NOT_SET -> Optional.empty()
+        }
+
+        if (chave.isEmpty) {
+            responseObserver.onError(Status.INVALID_ARGUMENT
+                                        .withDescription("Chave Pix não encontrada")
+                                        .asRuntimeException());
+            return
+        }
+
+        val titular = UUID.fromString(request.clienteId)
+        if (!chave.get().pertenceAo(titular)) {
+            responseObserver.onError(Status.PERMISSION_DENIED
+                                        .withDescription("Cliente não tem acesso a esta chave Pix")
+                                        .asRuntimeException());
+            return
+        }
+
+        val k = chave.get()
+        responseObserver.onNext(CarregaChavePixResponse.newBuilder()
+            .setClienteId(k.clienteId.toString())
+            .setChave(CarregaChavePixResponse.ChavePix
+                .newBuilder()
+                .setPixId(k.id.toString())
+                .setTipo(br.com.zup.edu.grpc.TipoDeChave.valueOf(k.tipo.name))
+                .setChave(k.chave)
+                .setConta(CarregaChavePixResponse.ChavePix.ContaInfo.newBuilder()
+                    .setTipo(br.com.zup.edu.grpc.TipoDeConta.valueOf(k.tipoDeConta.name))
+                    .setInstituicao(k.conta.instituicao)
+                    .setNomeDoTitular(k.conta.nomeDoTitular)
+                    .setCpfDoTitular(k.conta.cpfDoTitular)
+                    .setAgencia(k.conta.agencia)
+                    .setNumeroDaConta(k.conta.numeroDaConta)
+                    .build()
+                )
+                .setCriadaEm(k.criadaEm.let {
+                    val createdAt = it.atZone(ZoneId.of("UTC")).toInstant()
+                    Timestamp.newBuilder()
+                        .setSeconds(createdAt.epochSecond)
+                        .setNanos(createdAt.nano)
+                        .build()
+                })
+            )
+            .build()
+        ).also {
+            responseObserver.onCompleted()
         }
     }
 

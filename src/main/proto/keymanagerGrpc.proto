@@ -4,12 +4,15 @@ option java_multiple_files = true;
 option java_outer_classname = "KeymanagerGrpc";
 
 package br.com.zup.edu.grpc;
+import "google/protobuf/timestamp.proto";
 
 service KeymanagerGrpcService {
 
   rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
 
   rpc remove(RemoveChavePixRequest) returns (RemoveChavePixResponse) {}
+
+  rpc carrega(CarregaChavePixRequest) returns (CarregaChavePixResponse) {}
 
 }
 
@@ -51,4 +54,36 @@ message RemoveChavePixRequest {
 message RemoveChavePixResponse {
   string clienteId = 1;
   string pixId     = 2;
+}
+
+message CarregaChavePixRequest {
+  string clienteId = 1;
+  oneof filtro {
+    string pixId = 2;
+    string chave = 3;
+  }
+}
+
+message CarregaChavePixResponse {
+
+  message ChavePix {
+
+    message ContaInfo {
+      TipoDeConta tipo     = 1;
+      string instituicao   = 2; /** ITAU UNIBANCO */
+      string nomeDoTitular = 3;
+      string cpfDoTitular  = 4;
+      string agencia       = 5;
+      string numeroDaConta = 6;
+    }
+
+    string pixId            = 1;
+    TipoDeChave tipo        = 2;
+    string chave            = 3;
+    ContaInfo conta         = 4;
+    google.protobuf.Timestamp criadaEm = 5;
+  }
+
+  string clienteId = 1;
+  ChavePix chave   = 2;
 }

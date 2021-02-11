@@ -1,8 +1,8 @@
 package br.com.zup.edu.chaves
 
+import br.com.zup.edu.chaves.integration.ChavePixInfo
 import br.com.zup.edu.grpc.*
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
-import br.com.zup.pix.chaves.ChavePix
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import com.google.protobuf.Any
@@ -97,59 +97,46 @@ class KeyManagerEndpoint(
         responseObserver: StreamObserver<CarregaChavePixResponse>,
     ) {
 
-        if (request.clienteId.isNullOrBlank()) {
+        val filtro: Filtro = when(request.filtroCase) {
+            PIXID -> request.pixId.let {
+                Filtro.PorPixId(clienteId = it.clienteId, pixId = it.pixId)
+            }
+            CHAVE -> Filtro.PorChave(request.chave)
+            FILTRO_NOT_SET -> Filtro.Invalido() // IMPROVEMENT: poderia finalizar fluxo com INVALID_ARGUMENT
+        }
+
+        var chaveInfo = try {
+            service.carregaPor(filtro)
+        } catch (e: ConstraintViolationException) {
+            e.printStackTrace()
+            responseObserver.onError(handleInvalidArguments(e))
+            return;
+        }
+
+        if (chaveInfo == null ) {
             responseObserver.onError(Status.INVALID_ARGUMENT
-                                        .withDescription("Identificador do cliente deve ser informado")
-                                        .asRuntimeException());
+                .withDescription("Chave Pix não encontrada")
+                .asRuntimeException());
             return
         }
 
-        if (request.pixId.isNullOrBlank() && request.chave.isNullOrBlank()) {
-            responseObserver.onError(Status.INVALID_ARGUMENT
-                                        .withDescription("Pix ID ou Chave deve ser informado")
-                                        .asRuntimeException());
-            return
-        }
-
-        val chave = when (request.filtroCase) {
-            PIXID -> repository.findById(UUID.fromString(request.pixId))
-            CHAVE -> repository.findByChave(request.chave)
-            FILTRO_NOT_SET -> Optional.empty()
-        }
-
-        if (chave.isEmpty) {
-            responseObserver.onError(Status.INVALID_ARGUMENT
-                                        .withDescription("Chave Pix não encontrada")
-                                        .asRuntimeException());
-            return
-        }
-
-        val titular = UUID.fromString(request.clienteId)
-        if (!chave.get().pertenceAo(titular)) {
-            responseObserver.onError(Status.PERMISSION_DENIED
-                                        .withDescription("Cliente não tem acesso a esta chave Pix")
-                                        .asRuntimeException());
-            return
-        }
-
-        val k = chave.get()
         responseObserver.onNext(CarregaChavePixResponse.newBuilder()
-            .setClienteId(k.clienteId.toString())
+            .setClienteId(chaveInfo.clienteId?.toString() ?: "") // Protobuf usa "" como default value para String
+            .setPixId(chaveInfo.pixId?.toString() ?: "") // Protobuf usa "" como default value para String
             .setChave(CarregaChavePixResponse.ChavePix
                 .newBuilder()
-                .setPixId(k.id.toString())
-                .setTipo(br.com.zup.edu.grpc.TipoDeChave.valueOf(k.tipo.name))
-                .setChave(k.chave)
+                .setTipo(br.com.zup.edu.grpc.TipoDeChave.valueOf(chaveInfo.tipo.name))
+                .setChave(chaveInfo.chave)
                 .setConta(CarregaChavePixResponse.ChavePix.ContaInfo.newBuilder()
-                    .setTipo(br.com.zup.edu.grpc.TipoDeConta.valueOf(k.tipoDeConta.name))
-                    .setInstituicao(k.conta.instituicao)
-                    .setNomeDoTitular(k.conta.nomeDoTitular)
-                    .setCpfDoTitular(k.conta.cpfDoTitular)
-                    .setAgencia(k.conta.agencia)
-                    .setNumeroDaConta(k.conta.numeroDaConta)
+                    .setTipo(br.com.zup.edu.grpc.TipoDeConta.valueOf(chaveInfo.tipoDeConta.name))
+                    .setInstituicao(chaveInfo.conta.instituicao)
+                    .setNomeDoTitular(chaveInfo.conta.nomeDoTitular)
+                    .setCpfDoTitular(chaveInfo.conta.cpfDoTitular)
+                    .setAgencia(chaveInfo.conta.agencia)
+                    .setNumeroDaConta(chaveInfo.conta.numeroDaConta)
                     .build()
                 )
-                .setCriadaEm(k.criadaEm.let {
+                .setCriadaEm(chaveInfo.registradaEm.let {
                     val createdAt = it.atZone(ZoneId.of("UTC")).toInstant()
                     Timestamp.newBuilder()
                         .setSeconds(createdAt.epochSecond)

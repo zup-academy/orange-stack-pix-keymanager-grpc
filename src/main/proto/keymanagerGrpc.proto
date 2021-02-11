@@ -57,10 +57,14 @@ message RemoveChavePixResponse {
 }
 
 message CarregaChavePixRequest {
-  string clienteId = 1;
+  message FiltroPorPixId {
+    string clienteId = 1;
+    string pixId     = 2;
+  }
+
   oneof filtro {
-    string pixId = 2;
-    string chave = 3;
+    FiltroPorPixId pixId  = 1;
+    string chave          = 2;
   }
 }
 
@@ -77,13 +81,13 @@ message CarregaChavePixResponse {
       string numeroDaConta = 6;
     }
 
-    string pixId            = 1;
-    TipoDeChave tipo        = 2;
-    string chave            = 3;
-    ContaInfo conta         = 4;
-    google.protobuf.Timestamp criadaEm = 5;
+    TipoDeChave tipo        = 1;
+    string chave            = 2;
+    ContaInfo conta         = 3;
+    google.protobuf.Timestamp criadaEm = 4;
   }
 
   string clienteId = 1;
-  ChavePix chave   = 2;
+  string pixId     = 2;
+  ChavePix chave   = 3;
 }

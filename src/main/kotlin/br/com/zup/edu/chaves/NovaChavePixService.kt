@@ -1,9 +1,9 @@
 package br.com.zup.edu.chaves
 
+import br.com.zup.edu.chaves.integration.ChavePixInfo
 import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
 import br.com.zup.edu.chaves.integration.bcb.CreatePixKeyRequest
 import br.com.zup.edu.chaves.integration.bcb.DeletePixKeyRequest
-import br.com.zup.edu.chaves.integration.bcb.PixKeyType
 import br.com.zup.edu.chaves.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.edu.shared.validation.ValidUUID
 import br.com.zup.pix.chaves.ChavePix
@@ -11,7 +11,6 @@ import br.com.zup.pix.chaves.ContaAssociada
 import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory
-import java.lang.IllegalStateException
 import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -87,4 +86,32 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
             throw IllegalStateException("Erro ao remover chave Pix no Banco Central do Brasil (BCB)")
         }
     }
+
+    fun carregaPor(@Valid filtro: Filtro): ChavePixInfo? {
+        return when(filtro) {
+            is Filtro.PorPixId -> {
+                val k = repository.findById(filtro.pixIdAsUuid())
+                            .filter { it.pertenceAo(filtro.clienteIdAsUuid()) }
+                if (k.isPresent) ChavePixInfo.of(k.get()) else null
+            }
+            is Filtro.PorChave -> carregaPorChave(filtro.chave)
+            is Filtro.Invalido -> null
+        }
+    }
+
+    private fun carregaPorChave(chave: String): ChavePixInfo? {
+
+        val chavePix = repository.findByChave(chave)
+        if (chavePix.isPresent)
+            return ChavePixInfo.of(chavePix.get())
+
+        LOGGER.info("Consultando chave Pix '$chave' no Banco Central do Brasil (BCB)")
+
+        val response = bcbClient.findByKey(chave)
+        return when(response.status) {
+            HttpStatus.OK -> response.body()?.toModel()
+            else -> null
+        }
+    }
+
 }

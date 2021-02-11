@@ -1,16 +1,14 @@
 package br.com.zup.edu.chaves.integration.bcb
 
 
+import br.com.zup.edu.chaves.integration.ChavePixInfo
 import br.com.zup.pix.chaves.ChavePix
 import br.com.zup.pix.chaves.ContaAssociada
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
-import io.micronaut.http.annotation.Body
-import io.micronaut.http.annotation.Delete
-import io.micronaut.http.annotation.PathVariable
-import io.micronaut.http.annotation.Post
+import io.micronaut.http.annotation.*
 import io.micronaut.http.client.annotation.Client
 import java.time.LocalDateTime
 
@@ -32,6 +30,10 @@ interface BancoCentralClient {
         consumes = [MediaType.APPLICATION_XML]
     )
     fun delete(@PathVariable key: String, @Body request: DeletePixKeyRequest): HttpResponse<DeletePixKeyResponse>
+
+    @Get("/api/v1/pix/keys/{key}",
+        consumes = [MediaType.APPLICATION_XML])
+    fun findByKey(@PathVariable key: String): HttpResponse<PixKeyDetailsResponse>
 
 }
 
@@ -72,6 +74,33 @@ data class CreatePixKeyRequest(
                     )
             )
         }
+    }
+}
+
+data class PixKeyDetailsResponse (
+    val keyType: PixKeyType,
+    val key: String,
+    val bankAccount: BankAccount,
+    val owner: Owner,
+    val createdAt: LocalDateTime
+) {
+
+    fun toModel(): ChavePixInfo {
+        return ChavePixInfo(
+            tipo = keyType.domainType!!,
+            chave = this.key,
+            tipoDeConta = when (this.bankAccount.accountType) {
+                    BankAccount.AccountType.CACC -> TipoDeConta.CONTA_CORRENTE
+                    BankAccount.AccountType.SVGS -> TipoDeConta.CONTA_POUPANCA
+                },
+            conta = ContaAssociada(
+                instituicao = bankAccount.participant,
+                nomeDoTitular = owner.name,
+                cpfDoTitular = owner.taxIdNumber,
+                agencia = bankAccount.branch,
+                numeroDaConta = bankAccount.accountNumber
+            )
+        )
     }
 }
 

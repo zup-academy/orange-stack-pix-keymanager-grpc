@@ -3,6 +3,7 @@ package br.com.zup.edu.chaves
 import br.com.zup.edu.chaves.integration.ChavePixInfo
 import br.com.zup.edu.grpc.*
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
+import br.com.zup.pix.chaves.ChavePix
 import br.com.zup.pix.chaves.TipoDeChave
 import br.com.zup.pix.chaves.TipoDeConta
 import com.google.protobuf.Any
@@ -23,24 +24,24 @@ import org.hibernate.exception.ConstraintViolationException as DatabaseConstrain
 
 @Singleton
 class KeyManagerEndpoint(
-    @Inject val service: NovaChavePixService,
-    @Inject val repository: ChavePixRepository,
-) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() {
+    @Inject val service: NovaChavePixService, // 1
+) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() { // 1
 
+    // 12
     override fun registra(
-        request: RegistraChavePixRequest,
-        responseObserver: StreamObserver<RegistraChavePixResponse>
+        request: RegistraChavePixRequest, // 1
+        responseObserver: StreamObserver<RegistraChavePixResponse> // 1
     ) {
 
-        val novaChave = NovaChavePix(
+        val novaChave = NovaChavePix( // 1
             clienteId = request.clienteId,
-            tipo = TipoDeChave.valueOf(request.tipoDeChave.name),
+            tipo = TipoDeChave.valueOf(request.tipoDeChave.name), // 1
             chave = request.chave,
-            tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name)
+            tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name) // 1
         )
 
-        try {
-            val chaveCriada = service.registra(novaChave)
+        try { // 1
+            val chaveCriada: ChavePix = service.registra(novaChave) // 1
 
             responseObserver.onNext(RegistraChavePixResponse.newBuilder()
                                                 .setClienteId(chaveCriada.clienteId.toString())
@@ -49,17 +50,17 @@ class KeyManagerEndpoint(
 
             responseObserver.onCompleted()
 
-        } catch (e: ConstraintViolationException) {
+        } catch (e: ConstraintViolationException) { // 1
 
             e.printStackTrace()
             responseObserver.onError(handleInvalidArguments(e))
 
-        } catch (e: PersistenceException) {
+        } catch (e: PersistenceException) { // 1
 
             e.printStackTrace()
             responseObserver.onError(handlePersistenceException(e))
 
-        } catch (e: Throwable) {
+        } catch (e: Throwable) { // 1
             e.printStackTrace()
             responseObserver.onError(Status.INTERNAL
                                         .withDescription(e.message)

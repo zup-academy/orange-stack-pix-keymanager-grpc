@@ -1,11 +1,9 @@
 package br.com.zup.edu.chaves
 
-import br.com.zup.edu.chaves.integration.ChavePixInfo
+import br.com.zup.edu.chaves.extension.toModel
 import br.com.zup.edu.grpc.*
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
 import br.com.zup.pix.chaves.ChavePix
-import br.com.zup.pix.chaves.TipoDeChave
-import br.com.zup.pix.chaves.TipoDeConta
 import com.google.protobuf.Any
 import com.google.protobuf.Timestamp
 import com.google.rpc.BadRequest
@@ -33,14 +31,9 @@ class KeyManagerEndpoint(
         responseObserver: StreamObserver<RegistraChavePixResponse> // 1
     ) {
 
-        val novaChave = NovaChavePix( // 1
-            clienteId = request.clienteId,
-            tipo = TipoDeChave.valueOf(request.tipoDeChave.name), // 1
-            chave = request.chave,
-            tipoDeConta = TipoDeConta.valueOf(request.tipoDeConta.name) // 1
-        )
+        val novaChave = request.toModel() // 1
 
-        try { // 1
+        try { // 1 - mover para interceptor 4->1
             val chaveCriada: ChavePix = service.registra(novaChave) // 1
 
             responseObserver.onNext(RegistraChavePixResponse.newBuilder()

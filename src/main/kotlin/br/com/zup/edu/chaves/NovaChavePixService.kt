@@ -88,11 +88,12 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
     }
 
     fun carregaPor(@Valid filtro: Filtro): ChavePixInfo? {
-        return when(filtro) {
+        return when (filtro) {
             is Filtro.PorPixId -> {
-                val k = repository.findById(filtro.pixIdAsUuid())
+                repository.findById(filtro.pixIdAsUuid())
                             .filter { it.pertenceAo(filtro.clienteIdAsUuid()) }
-                if (k.isPresent) ChavePixInfo.of(k.get()) else null
+                            .map(ChavePixInfo::of)
+                            .orElse(null)
             }
             is Filtro.PorChave -> carregaPorChave(filtro.chave)
             is Filtro.Invalido -> null
@@ -100,17 +101,16 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
     }
 
     private fun carregaPorChave(chave: String): ChavePixInfo? {
+        return repository.findByChave(chave)
+            .map(ChavePixInfo::of)
+            .orElseGet {
+                LOGGER.info("Consultando chave Pix '$chave' no Banco Central do Brasil (BCB)")
 
-        val chavePix = repository.findByChave(chave)
-        if (chavePix.isPresent)
-            return ChavePixInfo.of(chavePix.get())
-
-        LOGGER.info("Consultando chave Pix '$chave' no Banco Central do Brasil (BCB)")
-
-        val response = bcbClient.findByKey(chave)
-        return when(response.status) {
-            HttpStatus.OK -> response.body()?.toModel()
-            else -> null
+                val response = bcbClient.findByKey(chave)
+                when (response.status) {
+                    HttpStatus.OK -> response.body()?.toModel()
+                    else -> null
+            }
         }
     }
 

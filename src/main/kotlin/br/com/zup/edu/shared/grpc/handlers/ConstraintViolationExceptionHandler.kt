@@ -8,6 +8,9 @@ import com.google.rpc.Code
 import javax.inject.Singleton
 import javax.validation.ConstraintViolationException
 
+/**
+ * Handles the Bean Validation errors adding theirs violations into request trailers (metadata)
+ */
 @Singleton
 class ConstraintViolationExceptionHandler : ExceptionHandler<ConstraintViolationException> {
 
@@ -16,7 +19,7 @@ class ConstraintViolationExceptionHandler : ExceptionHandler<ConstraintViolation
         val details = BadRequest.newBuilder()
             .addAllFieldViolations(e.constraintViolations.map {
                 BadRequest.FieldViolation.newBuilder()
-                    .setField(it.propertyPath.last().name ?: "key")
+                    .setField(it.propertyPath.last().name ?: "key") // still thinking how to solve this case
                     .setDescription(it.message)
                     .build()
             })

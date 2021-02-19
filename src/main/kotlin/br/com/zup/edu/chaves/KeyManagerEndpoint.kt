@@ -3,7 +3,6 @@ package br.com.zup.edu.chaves
 import br.com.zup.edu.chaves.extension.toModel
 import br.com.zup.edu.grpc.*
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
-import br.com.zup.pix.chaves.ChavePix
 import com.google.protobuf.Any
 import com.google.protobuf.Timestamp
 import com.google.rpc.BadRequest
@@ -13,12 +12,9 @@ import io.grpc.StatusRuntimeException
 import io.grpc.protobuf.StatusProto
 import io.grpc.stub.StreamObserver
 import java.time.ZoneId
-import java.util.*
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.persistence.PersistenceException
 import javax.validation.ConstraintViolationException
-import org.hibernate.exception.ConstraintViolationException as DatabaseConstraintError
 
 @Singleton
 class KeyManagerEndpoint(
@@ -34,7 +30,7 @@ class KeyManagerEndpoint(
         val novaChave = request.toModel() // 1
         val chaveCriada = service.registra(novaChave) // 1
 
-        responseObserver.onNext(RegistraChavePixResponse.newBuilder()
+        responseObserver.onNext(RegistraChavePixResponse.newBuilder() // 1
                                             .setClienteId(chaveCriada.clienteId.toString())
                                             .setPixId(chaveCriada.id.toString())
                                             .build())
@@ -121,18 +117,6 @@ class KeyManagerEndpoint(
             .build()
         ).also {
             responseObserver.onCompleted()
-        }
-    }
-
-    private fun handlePersistenceException(e: PersistenceException): StatusRuntimeException {
-        return when (e.cause) {
-            is DatabaseConstraintError -> Status.INVALID_ARGUMENT
-                                                .withDescription("chave Pix existente")
-                                                .asRuntimeException()
-            else -> Status.INTERNAL
-                          .withDescription(e.message)
-                          .withCause(e)
-                          .asRuntimeException()
         }
     }
 

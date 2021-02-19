@@ -1,13 +1,19 @@
 package br.com.zup.edu.shared.grpc
 
-import br.com.zup.edu.shared.grpc.handlers.DefaultExceptionHandler
-import io.grpc.*
-import org.slf4j.LoggerFactory
-import javax.inject.Singleton
-import io.grpc.ServerCall
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener
+import io.grpc.Metadata
+import io.grpc.ServerCall
+import io.grpc.ServerCallHandler
+import io.grpc.ServerInterceptor
+import org.slf4j.LoggerFactory
 import javax.inject.Inject
+import javax.inject.Singleton
 
+/**
+ * TIP1: This interceptor has been tested with gRPC-Java, maybe it doesn't work with gRPC-Kotlin
+ * TIP2: I'm not sure if this interceptor works well with all kind of gRPC-flows, like client and/or server streaming
+ * TIP3: I think that implementing this interceptor via AOP would be better because we don't have to worry about the gRPC life-cycle
+ */
 @Singleton
 class ExceptionHandlerInterceptor(@Inject val resolver: ExceptionHandlerResolver) : ServerInterceptor {
 
@@ -21,7 +27,7 @@ class ExceptionHandlerInterceptor(@Inject val resolver: ExceptionHandlerResolver
 
         fun handleException(call: ServerCall<ReqT, RespT>, e: Exception) {
             logger.error("Handling exception $e while processing the call: ${call.methodDescriptor.fullMethodName}")
-            val handler = resolver.resolve(e) ?: DefaultExceptionHandler() // TODO: evitar default handler aqui?
+            val handler = resolver.resolve(e)
             val translatedStatus = handler.handle(e)
             call.close(translatedStatus.status, translatedStatus.metadata)
         }

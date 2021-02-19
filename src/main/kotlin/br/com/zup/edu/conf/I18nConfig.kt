@@ -14,7 +14,7 @@ class I18nConfig {
     @Singleton
     fun messageSource(): MessageSource {
         return CompositeMessageSource(listOf(
-            ResourceBundleMessageSource("messages")
+            ResourceBundleMessageSource("messages") // messages.properties
         ))
     }
 }

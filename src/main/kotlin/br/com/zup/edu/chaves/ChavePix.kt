@@ -8,6 +8,10 @@ import javax.validation.constraints.NotBlank
 import javax.validation.constraints.NotNull
 
 @Entity
+@Table(uniqueConstraints = [UniqueConstraint(
+        name = "uk_chave_pix",
+        columnNames = ["chave"]
+)])
 class ChavePix(
         @field:NotNull
         @Column(nullable = false)

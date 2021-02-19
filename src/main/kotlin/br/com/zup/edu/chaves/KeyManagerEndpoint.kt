@@ -32,34 +32,14 @@ class KeyManagerEndpoint(
     ) {
 
         val novaChave = request.toModel() // 1
+        val chaveCriada = service.registra(novaChave) // 1
 
-        try { // 1 - mover para interceptor 4->1
-            val chaveCriada: ChavePix = service.registra(novaChave) // 1
+        responseObserver.onNext(RegistraChavePixResponse.newBuilder()
+                                            .setClienteId(chaveCriada.clienteId.toString())
+                                            .setPixId(chaveCriada.id.toString())
+                                            .build())
 
-            responseObserver.onNext(RegistraChavePixResponse.newBuilder()
-                                                .setClienteId(chaveCriada.clienteId.toString())
-                                                .setPixId(chaveCriada.id.toString())
-                                                .build())
-
-            responseObserver.onCompleted()
-
-        } catch (e: ConstraintViolationException) { // 1
-
-            e.printStackTrace()
-            responseObserver.onError(handleInvalidArguments(e))
-
-        } catch (e: PersistenceException) { // 1
-
-            e.printStackTrace()
-            responseObserver.onError(handlePersistenceException(e))
-
-        } catch (e: Throwable) { // 1
-            e.printStackTrace()
-            responseObserver.onError(Status.INTERNAL
-                                        .withDescription(e.message)
-                                        .withCause(e)
-                                        .asRuntimeException())
-        }
+        responseObserver.onCompleted()
     }
 
     override fun remove(request: RemoveChavePixRequest, responseObserver: StreamObserver<RemoveChavePixResponse>) {

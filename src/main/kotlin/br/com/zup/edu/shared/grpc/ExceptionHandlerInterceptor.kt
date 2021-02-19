@@ -1,14 +1,15 @@
 package br.com.zup.edu.shared.grpc
 
+import br.com.zup.edu.shared.grpc.handlers.DefaultExceptionHandler
 import io.grpc.*
 import org.slf4j.LoggerFactory
 import javax.inject.Singleton
-import javax.validation.ConstraintViolationException
 import io.grpc.ServerCall
 import io.grpc.ForwardingServerCallListener.SimpleForwardingServerCallListener
+import javax.inject.Inject
 
 @Singleton
-class ExceptionHandlerInterceptor : ServerInterceptor {
+class ExceptionHandlerInterceptor(@Inject val resolver: ExceptionHandlerResolver) : ServerInterceptor {
 
     private val logger = LoggerFactory.getLogger(ExceptionHandlerInterceptor::class.java)
 
@@ -18,15 +19,11 @@ class ExceptionHandlerInterceptor : ServerInterceptor {
         next: ServerCallHandler<ReqT, RespT>,
     ): ServerCall.Listener<ReqT> {
 
-        fun handleException(call: ServerCall<ReqT, RespT>, t: Exception) {
-            val translatedStatus = when (t) {
-                is ConstraintViolationException -> Status.INVALID_ARGUMENT
-                is IllegalArgumentException -> Status.INVALID_ARGUMENT
-                is IllegalStateException -> Status.FAILED_PRECONDITION
-                else -> Status.UNKNOWN
-            }
-            val newStatus = translatedStatus.withDescription(t?.message).withCause(t)
-            call.close(newStatus, headers)
+        fun handleException(call: ServerCall<ReqT, RespT>, e: Exception) {
+            logger.error("Handling exception $e while processing the call: ${call.methodDescriptor.fullMethodName}")
+            val handler = resolver.resolve(e) ?: DefaultExceptionHandler() // TODO: evitar default handler aqui?
+            val translatedStatus = handler.handle(e)
+            call.close(translatedStatus.status, translatedStatus.metadata)
         }
 
         val listener: ServerCall.Listener<ReqT> = try {

@@ -3,6 +3,7 @@ package br.com.zup.edu.chaves
 import br.com.zup.edu.chaves.extension.toModel
 import br.com.zup.edu.grpc.*
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
+import br.com.zup.edu.shared.grpc.ErrorHandler
 import com.google.protobuf.Any
 import com.google.protobuf.Timestamp
 import com.google.rpc.BadRequest
@@ -16,9 +17,10 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import javax.validation.ConstraintViolationException
 
+@ErrorHandler
 @Singleton
 class KeyManagerEndpoint(
-    @Inject val service: NovaChavePixService, // 1
+    @Inject private val service: NovaChavePixService, // 1
 ) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() { // 1
 
     // 12

@@ -15,7 +15,7 @@ class DefaultExceptionHandler : ExceptionHandler<Exception> {
             is IllegalStateException -> Status.FAILED_PRECONDITION.withDescription(e.message)
             else -> Status.UNKNOWN
         }
-        return StatusWithDetails(status)
+        return StatusWithDetails(status.withCause(e))
     }
 
     override fun supports(e: Exception): Boolean {

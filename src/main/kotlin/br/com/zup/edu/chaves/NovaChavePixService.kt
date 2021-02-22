@@ -87,7 +87,7 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
         }
     }
 
-    fun carregaPor(@Valid filtro: Filtro): ChavePixInfo? {
+    fun carregaPor(@Valid filtro: Filtro): ChavePixInfo {
         return when (filtro) {
             is Filtro.PorPixId -> {
                 repository.findById(filtro.pixIdAsUuid())
@@ -96,11 +96,11 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
                             .orElse(null)
             }
             is Filtro.PorChave -> carregaPorChave(filtro.chave)
-            is Filtro.Invalido -> null
+            is Filtro.Invalido -> throw IllegalArgumentException("Chave Pix não encontrada")
         }
     }
 
-    private fun carregaPorChave(chave: String): ChavePixInfo? {
+    private fun carregaPorChave(chave: String): ChavePixInfo {
         return repository.findByChave(chave)
             .map(ChavePixInfo::of)
             .orElseGet {
@@ -109,7 +109,7 @@ class NovaChavePixService(@Inject val itauClient: ContasDeClientesNoItauClient,
                 val response = bcbClient.findByKey(chave)
                 when (response.status) {
                     HttpStatus.OK -> response.body()?.toModel()
-                    else -> null
+                    else -> throw IllegalArgumentException("Chave Pix não encontrada")
             }
         }
     }

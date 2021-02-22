@@ -2,37 +2,28 @@ package br.com.zup.edu.chaves
 
 import br.com.zup.edu.chaves.extension.toModel
 import br.com.zup.edu.grpc.*
-import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
 import br.com.zup.edu.shared.grpc.ErrorHandler
-import com.google.protobuf.Any
-import com.google.protobuf.Timestamp
-import com.google.rpc.BadRequest
-import com.google.rpc.Code
-import io.grpc.Status
-import io.grpc.StatusRuntimeException
-import io.grpc.protobuf.StatusProto
 import io.grpc.stub.StreamObserver
-import java.time.ZoneId
 import javax.inject.Inject
 import javax.inject.Singleton
-import javax.validation.ConstraintViolationException
 
-@ErrorHandler
+// 16
+@ErrorHandler // 1
 @Singleton
 class KeyManagerEndpoint(
     @Inject private val service: NovaChavePixService, // 1
 ) : KeymanagerGrpcServiceGrpc.KeymanagerGrpcServiceImplBase() { // 1
 
-    // 12
+    // 12 -> 5
     override fun registra(
         request: RegistraChavePixRequest, // 1
         responseObserver: StreamObserver<RegistraChavePixResponse> // 1
     ) {
 
-        val novaChave = request.toModel() // 1
+        val novaChave = request.toModel() // 2
         val chaveCriada = service.registra(novaChave) // 1
 
-        responseObserver.onNext(RegistraChavePixResponse.newBuilder() // 1
+        responseObserver.onNext(RegistraChavePixResponse.newBuilder()
                                             .setClienteId(chaveCriada.clienteId.toString())
                                             .setPixId(chaveCriada.id.toString())
                                             .build())
@@ -40,106 +31,43 @@ class KeyManagerEndpoint(
         responseObserver.onCompleted()
     }
 
-    override fun remove(request: RemoveChavePixRequest, responseObserver: StreamObserver<RemoveChavePixResponse>) {
-        try {
-            service.remove(clienteId = request.clienteId, pixId = request.pixId)
-
-            responseObserver.onNext(RemoveChavePixResponse.newBuilder()
-                                                .setClienteId(request.clienteId)
-                                                .setPixId(request.pixId)
-                                                .build())
-            responseObserver.onCompleted()
-
-        } catch (e: ConstraintViolationException) {
-
-            e.printStackTrace()
-            responseObserver.onError(handleInvalidArguments(e))
-
-        } catch (e: Throwable) {
-            e.printStackTrace()
-            responseObserver.onError(Status.INTERNAL
-                                        .withDescription(e.message)
-                                        .withCause(e)
-                                        .asRuntimeException())
-        }
-    }
-
-    override fun carrega(
-        request: CarregaChavePixRequest,
-        responseObserver: StreamObserver<CarregaChavePixResponse>,
+    // 5 -> 2
+    override fun remove(
+        request: RemoveChavePixRequest, // 1
+        responseObserver: StreamObserver<RemoveChavePixResponse>, // 1
     ) {
 
-        val filtro: Filtro = when(request.filtroCase) {
-            PIXID -> request.pixId.let {
-                Filtro.PorPixId(clienteId = it.clienteId, pixId = it.pixId)
-            }
-            CHAVE -> Filtro.PorChave(request.chave)
-            FILTRO_NOT_SET -> Filtro.Invalido() // IMPROVEMENT: poderia finalizar fluxo com INVALID_ARGUMENT
-        }
+        service.remove(clienteId = request.clienteId, pixId = request.pixId)
 
-        var chaveInfo = try {
-            service.carregaPor(filtro)
-        } catch (e: ConstraintViolationException) {
-            e.printStackTrace()
-            responseObserver.onError(handleInvalidArguments(e))
-            return;
-        }
-
-        if (chaveInfo == null ) {
-            responseObserver.onError(Status.INVALID_ARGUMENT
-                .withDescription("Chave Pix não encontrada")
-                .asRuntimeException());
-            return
-        }
-
-        responseObserver.onNext(CarregaChavePixResponse.newBuilder()
-            .setClienteId(chaveInfo.clienteId?.toString() ?: "") // Protobuf usa "" como default value para String
-            .setPixId(chaveInfo.pixId?.toString() ?: "") // Protobuf usa "" como default value para String
-            .setChave(CarregaChavePixResponse.ChavePix
-                .newBuilder()
-                .setTipo(br.com.zup.edu.grpc.TipoDeChave.valueOf(chaveInfo.tipo.name))
-                .setChave(chaveInfo.chave)
-                .setConta(CarregaChavePixResponse.ChavePix.ContaInfo.newBuilder()
-                    .setTipo(br.com.zup.edu.grpc.TipoDeConta.valueOf(chaveInfo.tipoDeConta.name))
-                    .setInstituicao(chaveInfo.conta.instituicao)
-                    .setNomeDoTitular(chaveInfo.conta.nomeDoTitular)
-                    .setCpfDoTitular(chaveInfo.conta.cpfDoTitular)
-                    .setAgencia(chaveInfo.conta.agencia)
-                    .setNumeroDaConta(chaveInfo.conta.numeroDaConta)
-                    .build()
-                )
-                .setCriadaEm(chaveInfo.registradaEm.let {
-                    val createdAt = it.atZone(ZoneId.of("UTC")).toInstant()
-                    Timestamp.newBuilder()
-                        .setSeconds(createdAt.epochSecond)
-                        .setNanos(createdAt.nano)
-                        .build()
-                })
-            )
-            .build()
-        ).also {
-            responseObserver.onCompleted()
-        }
+        responseObserver.onNext(RemoveChavePixResponse.newBuilder()
+                                            .setClienteId(request.clienteId)
+                                            .setPixId(request.pixId)
+                                            .build())
+        responseObserver.onCompleted()
     }
 
-    private fun handleInvalidArguments(e: ConstraintViolationException): StatusRuntimeException {
+    // 19 -> 12 -> 6
+    override fun carrega(
+        request: CarregaChavePixRequest, // 1
+        responseObserver: StreamObserver<CarregaChavePixResponse>, // 1
+    ) {
 
-        val details = BadRequest.newBuilder()
-            .addAllFieldViolations(e.constraintViolations.map {
-                BadRequest.FieldViolation.newBuilder()
-                    .setField(it.propertyPath.last().name ?: "chave")
-                    .setDescription(it.message)
-                    .build()
-            })
-            .build()
+        val filtro = request.toModel() // 2
+        var chaveInfo = service.carregaPor(filtro) // 1
 
-        val statusProto = com.google.rpc.Status.newBuilder()
-                                .setCode(Code.INVALID_ARGUMENT_VALUE)
-                                .setMessage("Dados inválidos")
-                                .addDetails(Any.pack(details))
-                                .build()
-
-        return StatusProto.toStatusRuntimeException(statusProto)
+        /**
+         * Abordagens:
+         *
+         *  1. Delegate: Command Pattern (sub-controllers, services etc)
+         *      - new CarregaChavePixController().carrega(request, responseObserver)
+         *  2. Delegate: eventos pub/sub
+         *      - publisher.publish(CarregaChaveEvent(request, responseObserver)) // sincrono
+         *  3. Aumentar pontos para classes gRPC
+         *  4. Ignorar contagem de pontos de classes gRPC
+         *  5. Granularizar serviços no Protobuf
+         */
+        responseObserver.onNext(CarregaChavePixResponseConverter().convert(chaveInfo)) // 1
+        responseObserver.onCompleted()
     }
 
 }

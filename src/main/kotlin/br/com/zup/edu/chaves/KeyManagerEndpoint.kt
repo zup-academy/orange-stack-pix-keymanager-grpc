@@ -55,17 +55,6 @@ class KeyManagerEndpoint(
         val filtro = request.toModel() // 2
         var chaveInfo = service.carregaPor(filtro) // 1
 
-        /**
-         * Abordagens:
-         *
-         *  1. Delegate: Command Pattern (sub-controllers, services etc)
-         *      - new CarregaChavePixController().carrega(request, responseObserver)
-         *  2. Delegate: eventos pub/sub
-         *      - publisher.publish(CarregaChaveEvent(request, responseObserver)) // sincrono
-         *  3. Aumentar pontos para classes gRPC
-         *  4. Ignorar contagem de pontos de classes gRPC
-         *  5. Granularizar serviços no Protobuf
-         */
         responseObserver.onNext(CarregaChavePixResponseConverter().convert(chaveInfo)) // 1
         responseObserver.onCompleted()
     }

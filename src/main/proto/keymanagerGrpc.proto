@@ -16,6 +16,23 @@ service KeymanagerGrpcService {
 
 }
 
+service KeymanagerRegistraGrpcService {
+
+  rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
+
+}
+
+service KeymanagerRemoveGrpcService {
+
+  rpc remove(RemoveChavePixRequest) returns (RemoveChavePixResponse) {}
+
+}
+
+service KeymanagerReadOnlyGrpcService {
+
+  rpc carrega(CarregaChavePixRequest) returns (CarregaChavePixResponse) {}
+}
+
 /**
  * Se nenhum tipo for especificado, assume-se o tipo de chave CPF.
  */

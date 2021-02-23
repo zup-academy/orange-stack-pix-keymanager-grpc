@@ -11,10 +11,12 @@ import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ErrorHandler
+@ErrorHandler // 1
 @Singleton
-class CarregaChaveEndpoint(@Inject private val service: NovaChavePixService,) : KeymanagerReadOnlyGrpcServiceGrpc.KeymanagerReadOnlyGrpcServiceImplBase() {
+class CarregaChaveEndpoint(@Inject private val service: NovaChavePixService,) // 1
+    : KeymanagerReadOnlyGrpcServiceGrpc.KeymanagerReadOnlyGrpcServiceImplBase() { // 1
 
+    // 9
     override fun carrega(
         request: CarregaChavePixRequest, // 1
         responseObserver: StreamObserver<CarregaChavePixResponse>, // 1

@@ -6,16 +6,6 @@ option java_outer_classname = "KeymanagerGrpc";
 package br.com.zup.edu.grpc;
 import "google/protobuf/timestamp.proto";
 
-service KeymanagerGrpcService {
-
-  rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
-
-  rpc remove(RemoveChavePixRequest) returns (RemoveChavePixResponse) {}
-
-  rpc carrega(CarregaChavePixRequest) returns (CarregaChavePixResponse) {}
-
-}
-
 service KeymanagerRegistraGrpcService {
 
   rpc registra(RegistraChavePixRequest) returns (RegistraChavePixResponse) {}
@@ -31,6 +21,7 @@ service KeymanagerRemoveGrpcService {
 service KeymanagerReadOnlyGrpcService {
 
   rpc carrega(CarregaChavePixRequest) returns (CarregaChavePixResponse) {}
+
 }
 
 /**

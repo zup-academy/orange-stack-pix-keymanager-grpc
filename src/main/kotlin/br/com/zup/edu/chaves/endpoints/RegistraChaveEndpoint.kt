@@ -10,10 +10,12 @@ import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ErrorHandler
+@ErrorHandler // 1
 @Singleton
-class RegistraChaveEndpoint(@Inject private val service: NovaChavePixService,) : KeymanagerRegistraGrpcServiceGrpc.KeymanagerRegistraGrpcServiceImplBase() {
+class RegistraChaveEndpoint(@Inject private val service: NovaChavePixService,) // 1
+    : KeymanagerRegistraGrpcServiceGrpc.KeymanagerRegistraGrpcServiceImplBase() { // 1
 
+    // 8
     override fun registra(
         request: RegistraChavePixRequest, // 1
         responseObserver: StreamObserver<RegistraChavePixResponse> // 1
@@ -23,10 +25,9 @@ class RegistraChaveEndpoint(@Inject private val service: NovaChavePixService,) :
         val chaveCriada = service.registra(novaChave) // 1
 
         responseObserver.onNext(RegistraChavePixResponse.newBuilder()
-            .setClienteId(chaveCriada.clienteId.toString())
-            .setPixId(chaveCriada.id.toString())
-            .build())
-
+                                    .setClienteId(chaveCriada.clienteId.toString())
+                                    .setPixId(chaveCriada.id.toString())
+                                    .build())
         responseObserver.onCompleted()
     }
 

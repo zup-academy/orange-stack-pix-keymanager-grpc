@@ -9,10 +9,12 @@ import io.grpc.stub.StreamObserver
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@ErrorHandler
+@ErrorHandler // 1
 @Singleton
-class RemoveChaveEndpoint(@Inject private val service: NovaChavePixService,) : KeymanagerRemoveGrpcServiceGrpc.KeymanagerRemoveGrpcServiceImplBase() {
+class RemoveChaveEndpoint(@Inject private val service: NovaChavePixService,) // 1
+    : KeymanagerRemoveGrpcServiceGrpc.KeymanagerRemoveGrpcServiceImplBase() { // 1
 
+    // 5
     override fun remove(
         request: RemoveChavePixRequest, // 1
         responseObserver: StreamObserver<RemoveChavePixResponse>, // 1
@@ -21,9 +23,9 @@ class RemoveChaveEndpoint(@Inject private val service: NovaChavePixService,) : K
         service.remove(clienteId = request.clienteId, pixId = request.pixId)
 
         responseObserver.onNext(RemoveChavePixResponse.newBuilder()
-            .setClienteId(request.clienteId)
-            .setPixId(request.pixId)
-            .build())
+                                    .setClienteId(request.clienteId)
+                                    .setPixId(request.pixId)
+                                    .build())
         responseObserver.onCompleted()
     }
 

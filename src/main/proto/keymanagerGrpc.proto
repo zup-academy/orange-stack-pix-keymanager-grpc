@@ -30,22 +30,18 @@ service KeymanagerListaGrpcService {
 
 }
 
-/**
- * Se nenhum tipo for especificado, assume-se o tipo de chave CPF.
- */
 enum TipoDeChave {
-  CPF       = 0;
-  CELULAR   = 1;
-  EMAIL     = 2;
-  ALEATORIA = 3;
+  UNKNOWN_TIPO_CHAVE = 0;
+  CPF                = 1;
+  CELULAR            = 2;
+  EMAIL              = 3;
+  ALEATORIA          = 4;
 }
 
-/**
- * Se nenhum tipo for especificado, assume-se o tipo de conta CONTA_CORRENTE.
- */
 enum TipoDeConta {
-  CONTA_CORRENTE = 0;
-  CONTA_POUPANCA = 1;
+  UNKNOWN_TIPO_CONTA = 0;
+  CONTA_CORRENTE     = 1;
+  CONTA_POUPANCA     = 2;
 }
 
 /**
@@ -77,7 +73,7 @@ message RemoveChavePixResponse {
 }
 
 /**
- * Carega chave
+ * Carrega chave
  */
 message CarregaChavePixRequest {
   message FiltroPorPixId {

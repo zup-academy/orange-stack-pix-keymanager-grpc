@@ -1,14 +1,14 @@
-package br.com.zup.edu.chaves.integration.itau
+package br.com.zup.edu.integration.itau
 
-import br.com.zup.pix.chaves.ContaAssociada
+import br.com.zup.edu.pix.ContaAssociada
 
 
 data class DadosDaContaResponse(
-        val tipo: String,
-        val instituicao: InstituicaoResponse,
-        val agencia: String,
-        val numero: String,
-        val titular: TitularResponse
+    val tipo: String,
+    val instituicao: InstituicaoResponse,
+    val agencia: String,
+    val numero: String,
+    val titular: TitularResponse
 ) {
 
     fun toModel(): ContaAssociada {

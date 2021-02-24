@@ -1,23 +1,10 @@
-package br.com.zup.edu.chaves.extension
+package br.com.zup.edu.pix.carrega
 
-import br.com.zup.edu.chaves.Filtro
-import br.com.zup.edu.chaves.NovaChavePix
 import br.com.zup.edu.grpc.CarregaChavePixRequest
 import br.com.zup.edu.grpc.CarregaChavePixRequest.FiltroCase.*
-import br.com.zup.edu.grpc.RegistraChavePixRequest
-import br.com.zup.pix.chaves.TipoDeChave
-import br.com.zup.pix.chaves.TipoDeConta
 import javax.validation.ConstraintViolationException
 import javax.validation.Validator
 
-fun RegistraChavePixRequest.toModel() : NovaChavePix {
-    return NovaChavePix( // 1
-        clienteId = clienteId,
-        tipo = TipoDeChave.valueOf(tipoDeChave.name), // 1
-        chave = chave,
-        tipoDeConta = TipoDeConta.valueOf(tipoDeConta.name) // 1
-    )
-}
 
 fun CarregaChavePixRequest.toModel(validator: Validator): Filtro { // 1
 

@@ -1,9 +1,7 @@
-package br.com.zup.edu.chaves.endpoints
+package br.com.zup.edu.pix.carrega
 
-import br.com.zup.edu.chaves.CarregaChavePixResponseConverter
-import br.com.zup.edu.chaves.ChavePixRepository
-import br.com.zup.edu.chaves.extension.toModel
-import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
+import br.com.zup.edu.pix.ChavePixRepository
+import br.com.zup.edu.integration.bcb.BancoCentralClient
 import br.com.zup.edu.grpc.CarregaChavePixRequest
 import br.com.zup.edu.grpc.CarregaChavePixResponse
 import br.com.zup.edu.grpc.KeymanagerCarregaGrpcServiceGrpc

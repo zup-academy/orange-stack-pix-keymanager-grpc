@@ -1,7 +1,7 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.pix.carrega
 
-import br.com.zup.edu.chaves.integration.ChavePixInfo
-import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
+import br.com.zup.edu.integration.bcb.BancoCentralClient
+import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.shared.validation.ValidUUID
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpStatus

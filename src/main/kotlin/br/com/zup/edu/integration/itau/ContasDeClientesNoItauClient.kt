@@ -1,4 +1,4 @@
-package br.com.zup.edu.chaves.integration.itau
+package br.com.zup.edu.integration.itau
 
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.annotation.Get

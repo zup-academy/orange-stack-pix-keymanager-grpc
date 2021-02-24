@@ -1,4 +1,4 @@
-package br.com.zup.pix.chaves
+package br.com.zup.edu.pix
 
 import javax.persistence.Column
 import javax.persistence.Embeddable

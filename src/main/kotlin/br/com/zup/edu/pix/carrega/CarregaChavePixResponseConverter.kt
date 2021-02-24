@@ -1,6 +1,5 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.pix.carrega
 
-import br.com.zup.edu.chaves.integration.ChavePixInfo
 import br.com.zup.edu.grpc.CarregaChavePixResponse
 import com.google.protobuf.Timestamp
 import java.time.ZoneId

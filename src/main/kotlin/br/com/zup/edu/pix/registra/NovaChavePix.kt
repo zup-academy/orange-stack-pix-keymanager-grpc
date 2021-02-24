@@ -1,11 +1,10 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.pix.registra
 
-import br.com.zup.edu.shared.validation.ValidPixKey
 import br.com.zup.edu.shared.validation.ValidUUID
-import br.com.zup.pix.chaves.ChavePix
-import br.com.zup.pix.chaves.ContaAssociada
-import br.com.zup.pix.chaves.TipoDeChave
-import br.com.zup.pix.chaves.TipoDeConta
+import br.com.zup.edu.pix.ChavePix
+import br.com.zup.edu.pix.ContaAssociada
+import br.com.zup.edu.pix.TipoDeChave
+import br.com.zup.edu.pix.TipoDeConta
 import io.micronaut.core.annotation.Introspected
 import java.util.*
 import javax.validation.constraints.NotBlank

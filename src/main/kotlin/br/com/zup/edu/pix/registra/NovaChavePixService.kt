@@ -1,9 +1,10 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.pix.registra
 
-import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
-import br.com.zup.edu.chaves.integration.bcb.CreatePixKeyRequest
-import br.com.zup.edu.chaves.integration.itau.ContasDeClientesNoItauClient
-import br.com.zup.pix.chaves.ChavePix
+import br.com.zup.edu.integration.bcb.BancoCentralClient
+import br.com.zup.edu.integration.bcb.CreatePixKeyRequest
+import br.com.zup.edu.integration.itau.ContasDeClientesNoItauClient
+import br.com.zup.edu.pix.ChavePix
+import br.com.zup.edu.pix.ChavePixRepository
 import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
 import org.slf4j.LoggerFactory

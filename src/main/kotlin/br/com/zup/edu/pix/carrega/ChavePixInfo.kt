@@ -1,9 +1,9 @@
-package br.com.zup.edu.chaves.integration
+package br.com.zup.edu.pix.carrega
 
-import br.com.zup.pix.chaves.ChavePix
-import br.com.zup.pix.chaves.ContaAssociada
-import br.com.zup.pix.chaves.TipoDeChave
-import br.com.zup.pix.chaves.TipoDeConta
+import br.com.zup.edu.pix.ChavePix
+import br.com.zup.edu.pix.ContaAssociada
+import br.com.zup.edu.pix.TipoDeChave
+import br.com.zup.edu.pix.TipoDeConta
 import java.time.LocalDateTime
 import java.util.*
 

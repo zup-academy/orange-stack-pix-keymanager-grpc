@@ -1,4 +1,4 @@
-package br.com.zup.pix.chaves
+package br.com.zup.edu.pix
 
 enum class TipoDeConta {
 

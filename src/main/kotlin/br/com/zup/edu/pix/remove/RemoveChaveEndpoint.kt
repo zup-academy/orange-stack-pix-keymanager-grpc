@@ -1,6 +1,5 @@
-package br.com.zup.edu.chaves.endpoints
+package br.com.zup.edu.pix.remove
 
-import br.com.zup.edu.chaves.RemoveChaveService
 import br.com.zup.edu.grpc.KeymanagerRemoveGrpcServiceGrpc
 import br.com.zup.edu.grpc.RemoveChavePixRequest
 import br.com.zup.edu.grpc.RemoveChavePixResponse

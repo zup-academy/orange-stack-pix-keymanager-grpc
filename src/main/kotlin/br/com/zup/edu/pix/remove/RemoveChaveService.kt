@@ -1,8 +1,8 @@
-package br.com.zup.edu.chaves
+package br.com.zup.edu.pix.remove
 
-import br.com.zup.edu.chaves.endpoints.RemoveChaveEndpoint
-import br.com.zup.edu.chaves.integration.bcb.BancoCentralClient
-import br.com.zup.edu.chaves.integration.bcb.DeletePixKeyRequest
+import br.com.zup.edu.integration.bcb.BancoCentralClient
+import br.com.zup.edu.integration.bcb.DeletePixKeyRequest
+import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.shared.validation.ValidUUID
 import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated

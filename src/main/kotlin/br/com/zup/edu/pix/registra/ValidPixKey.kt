@@ -1,6 +1,5 @@
-package br.com.zup.edu.shared.validation
+package br.com.zup.edu.pix.registra
 
-import br.com.zup.edu.chaves.NovaChavePix
 import io.micronaut.core.annotation.AnnotationValue
 import io.micronaut.validation.validator.constraints.ConstraintValidator
 import io.micronaut.validation.validator.constraints.ConstraintValidatorContext

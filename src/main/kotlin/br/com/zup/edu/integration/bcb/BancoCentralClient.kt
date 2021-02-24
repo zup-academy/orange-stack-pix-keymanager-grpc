@@ -1,11 +1,11 @@
-package br.com.zup.edu.chaves.integration.bcb
+package br.com.zup.edu.integration.bcb
 
 
-import br.com.zup.edu.chaves.integration.ChavePixInfo
-import br.com.zup.pix.chaves.ChavePix
-import br.com.zup.pix.chaves.ContaAssociada
-import br.com.zup.pix.chaves.TipoDeChave
-import br.com.zup.pix.chaves.TipoDeConta
+import br.com.zup.edu.pix.carrega.ChavePixInfo
+import br.com.zup.edu.pix.ChavePix
+import br.com.zup.edu.pix.ContaAssociada
+import br.com.zup.edu.pix.TipoDeChave
+import br.com.zup.edu.pix.TipoDeConta
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
@@ -38,8 +38,8 @@ interface BancoCentralClient {
 }
 
 data class DeletePixKeyRequest(
-        val key: String,
-        val participant: String = ContaAssociada.ITAU_UNIBANCO_ISPB,
+    val key: String,
+    val participant: String = ContaAssociada.ITAU_UNIBANCO_ISPB,
 )
 
 data class DeletePixKeyResponse(
@@ -49,10 +49,10 @@ data class DeletePixKeyResponse(
 )
 
 data class CreatePixKeyRequest(
-        val keyType: PixKeyType,
-        val key: String,
-        val bankAccount: BankAccount,
-        val owner: Owner
+    val keyType: PixKeyType,
+    val key: String,
+    val bankAccount: BankAccount,
+    val owner: Owner
 ) {
 
     companion object {
@@ -105,17 +105,17 @@ data class PixKeyDetailsResponse (
 }
 
 data class CreatePixKeyResponse (
-        val keyType: PixKeyType,
-        val key: String,
-        val bankAccount: BankAccount,
-        val owner: Owner,
-        val createdAt: LocalDateTime
+    val keyType: PixKeyType,
+    val key: String,
+    val bankAccount: BankAccount,
+    val owner: Owner,
+    val createdAt: LocalDateTime
 )
 
 data class Owner(
-        val type: OwnerType,
-        val name: String,
-        val taxIdNumber: String
+    val type: OwnerType,
+    val name: String,
+    val taxIdNumber: String
 ) {
 
     enum class OwnerType {

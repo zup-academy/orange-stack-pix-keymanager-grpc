@@ -1,7 +1,5 @@
-package br.com.zup.edu.chaves.endpoints
+package br.com.zup.edu.pix.registra
 
-import br.com.zup.edu.chaves.NovaChavePixService
-import br.com.zup.edu.chaves.extension.toModel
 import br.com.zup.edu.grpc.KeymanagerRegistraGrpcServiceGrpc
 import br.com.zup.edu.grpc.RegistraChavePixRequest
 import br.com.zup.edu.grpc.RegistraChavePixResponse

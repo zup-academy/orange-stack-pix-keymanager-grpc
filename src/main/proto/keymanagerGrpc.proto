@@ -24,6 +24,12 @@ service KeymanagerCarregaGrpcService {
 
 }
 
+service KeymanagerListaGrpcService {
+
+  rpc lista(ListaChavesPixRequest) returns (ListaChavesPixResponse) {}
+
+}
+
 /**
  * Se nenhum tipo for especificado, assume-se o tipo de chave CPF.
  */
@@ -42,6 +48,9 @@ enum TipoDeConta {
   CONTA_POUPANCA = 1;
 }
 
+/**
+ * Registra chave
+ */
 message RegistraChavePixRequest {
   string clienteId        = 1;
   TipoDeChave tipoDeChave = 2;
@@ -54,6 +63,9 @@ message RegistraChavePixResponse {
   string pixId     = 2;
 }
 
+/**
+ * Remove chave
+ */
 message RemoveChavePixRequest {
   string clienteId = 1;
   string pixId     = 2;
@@ -64,6 +76,9 @@ message RemoveChavePixResponse {
   string pixId     = 2;
 }
 
+/**
+ * Carega chave
+ */
 message CarregaChavePixRequest {
   message FiltroPorPixId {
     string clienteId = 1;
@@ -98,4 +113,25 @@ message CarregaChavePixResponse {
   string clienteId = 1;
   string pixId     = 2;
   ChavePix chave   = 3;
+}
+
+/**
+ * Lista chaves
+ */
+message ListaChavesPixRequest {
+  string clienteId = 1;
+}
+
+message ListaChavesPixResponse {
+
+  message ChavePix {
+    string pixId            = 1;
+    TipoDeChave tipo        = 2;
+    string chave            = 3;
+    TipoDeConta tipoDeConta = 4;
+    google.protobuf.Timestamp criadaEm = 5;
+  }
+
+  string clienteId         = 1;
+  repeated ChavePix chaves = 2;
 }

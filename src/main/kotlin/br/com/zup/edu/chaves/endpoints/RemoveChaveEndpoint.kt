@@ -1,6 +1,6 @@
 package br.com.zup.edu.chaves.endpoints
 
-import br.com.zup.edu.chaves.NovaChavePixService
+import br.com.zup.edu.chaves.RemoveChaveService
 import br.com.zup.edu.grpc.KeymanagerRemoveGrpcServiceGrpc
 import br.com.zup.edu.grpc.RemoveChavePixRequest
 import br.com.zup.edu.grpc.RemoveChavePixResponse
@@ -11,7 +11,7 @@ import javax.inject.Singleton
 
 @ErrorHandler // 1
 @Singleton
-class RemoveChaveEndpoint(@Inject private val service: NovaChavePixService,) // 1
+class RemoveChaveEndpoint(@Inject private val service: RemoveChaveService,) // 1
     : KeymanagerRemoveGrpcServiceGrpc.KeymanagerRemoveGrpcServiceImplBase() { // 1
 
     // 5
@@ -22,7 +22,7 @@ class RemoveChaveEndpoint(@Inject private val service: NovaChavePixService,) // 
 
         service.remove(clienteId = request.clienteId, pixId = request.pixId)
 
-        responseObserver.onNext(RemoveChavePixResponse.newBuilder()
+        responseObserver.onNext(RemoveChavePixResponse.newBuilder() // 1
                                     .setClienteId(request.clienteId)
                                     .setPixId(request.pixId)
                                     .build())

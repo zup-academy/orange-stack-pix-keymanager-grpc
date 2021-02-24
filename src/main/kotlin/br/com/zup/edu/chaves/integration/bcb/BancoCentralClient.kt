@@ -39,7 +39,7 @@ interface BancoCentralClient {
 
 data class DeletePixKeyRequest(
         val key: String,
-        val participant: String,
+        val participant: String = ContaAssociada.ITAU_UNIBANCO_ISPB,
 )
 
 data class DeletePixKeyResponse(

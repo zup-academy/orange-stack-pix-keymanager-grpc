@@ -4,6 +4,7 @@ import br.com.zup.edu.integration.bcb.BancoCentralClient
 import br.com.zup.edu.integration.bcb.CreatePixKeyRequest
 import br.com.zup.edu.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.edu.pix.ChavePix
+import br.com.zup.edu.pix.ChavePixExistenteException
 import br.com.zup.edu.pix.ChavePixRepository
 import io.micronaut.http.HttpStatus
 import io.micronaut.validation.Validated
@@ -13,7 +14,7 @@ import javax.inject.Singleton
 import javax.transaction.Transactional
 import javax.validation.Valid
 
-// 30 -> 10
+// 30 -> 13
 @Validated
 @Singleton
 class NovaChavePixService(@Inject val repository: ChavePixRepository, // 1
@@ -27,11 +28,11 @@ class NovaChavePixService(@Inject val repository: ChavePixRepository, // 1
 
         // 1. verifica se chave já existe no sistema
         if (repository.existsByChave(novaChave.chave)) // 1
-            throw IllegalArgumentException("Chave Pix '${novaChave.chave}' existente")
+            throw ChavePixExistenteException("Chave Pix '${novaChave.chave}' existente") // 1
 
         // 2. busca dados da conta no ERP do ITAU
-        val response = itauClient.buscaContaPorTipo(novaChave.clienteId!!, novaChave.tipoDeConta!!.name)
-        val conta = response.body()?.toModel() ?: throw IllegalStateException("Cliente não encontrado no Itau")
+        val response = itauClient.buscaContaPorTipo(novaChave.clienteId!!, novaChave.tipoDeConta!!.name) // 1
+        val conta = response.body()?.toModel() ?: throw IllegalStateException("Cliente não encontrado no Itau") // 1
 
         // 3. grava no banco de dados
         val chave = novaChave.toModel(conta)

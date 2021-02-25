@@ -2,6 +2,7 @@ package br.com.zup.edu.pix.carrega
 
 import br.com.zup.edu.integration.bcb.BancoCentralClient
 import br.com.zup.edu.pix.ChavePixRepository
+import br.com.zup.edu.pix.ChavePixNaoEncontradaException
 import br.com.zup.edu.shared.validation.ValidUUID
 import io.micronaut.core.annotation.Introspected
 import io.micronaut.http.HttpStatus
@@ -32,7 +33,7 @@ sealed class Filtro {
             return repository.findById(pixIdAsUuid())
                              .filter { it.pertenceAo(clienteIdAsUuid()) }
                              .map(ChavePixInfo::of)
-                             .orElseThrow { IllegalArgumentException("Chave Pix não encontrada") }
+                             .orElseThrow { ChavePixNaoEncontradaException("Chave Pix não encontrada") }
         }
     }
 
@@ -50,7 +51,7 @@ sealed class Filtro {
                         val response = bcbClient.findByKey(chave) // 1
                         when (response.status) { // 1
                             HttpStatus.OK -> response.body()?.toModel() // 1
-                            else -> throw IllegalArgumentException("Chave Pix não encontrada") // 1
+                            else -> throw ChavePixNaoEncontradaException("Chave Pix não encontrada") // 1
                         }
                     }
         }
@@ -60,7 +61,7 @@ sealed class Filtro {
     class Invalido() : Filtro() {
 
         override fun filtra(repository: ChavePixRepository, bcbClient: BancoCentralClient): ChavePixInfo {
-            throw IllegalArgumentException("Chave Pix não encontrada")
+            throw IllegalArgumentException("Chave Pix inválida ou não informada")
         }
     }
 }

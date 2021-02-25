@@ -14,7 +14,7 @@ import javax.inject.Singleton
 import javax.transaction.Transactional
 import javax.validation.Valid
 
-// 30 -> 13
+// 30 -> 12
 @Validated
 @Singleton
 class NovaChavePixService(@Inject val repository: ChavePixRepository, // 1
@@ -48,9 +48,7 @@ class NovaChavePixService(@Inject val repository: ChavePixRepository, // 1
             throw IllegalStateException("Erro ao registrar chave Pix no Banco Central do Brasil (BCB)")
 
         // 5. atualiza chave do dominio com chave gerada pelo BCB
-        if (chave.isAleatoria()) { // 1
-            chave.chave = bcbResponse.body()!!.key
-        }
+        chave.atualiza(bcbResponse.body()!!.key)
 
         return chave
     }

@@ -58,4 +58,16 @@ class ChavePix(
                 return tipo == TipoDeChave.ALEATORIA
         }
 
+        /**
+         * Atualiza a valor da chave. Somente chave do tipo ALEATORIA pode
+         * ser alterado.
+         */
+        fun atualiza(chave: String): Boolean {
+                if (isAleatoria()) {
+                        this.chave = chave
+                        return true
+                }
+                return false
+        }
+
 }

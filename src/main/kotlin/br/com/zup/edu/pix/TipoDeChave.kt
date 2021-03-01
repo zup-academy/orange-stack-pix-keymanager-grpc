@@ -7,7 +7,7 @@ enum class TipoDeChave {
 
     CPF {
         override fun valida(chave: String?): Boolean {
-            if (chave == null || chave.isBlank()) {
+            if (chave.isNullOrBlank()) {
                 return false
             }
 
@@ -23,7 +23,7 @@ enum class TipoDeChave {
     },
     CELULAR {
         override fun valida(chave: String?): Boolean {
-            if (chave == null || chave.isBlank()) {
+            if (chave.isNullOrBlank()) {
                 return false
             }
             return chave.matches("^\\+[1-9][0-9]\\d{1,14}\$".toRegex())
@@ -31,7 +31,7 @@ enum class TipoDeChave {
     },
     EMAIL {
         override fun valida(chave: String?): Boolean {
-            if (chave == null || chave.isBlank()) {
+            if (chave.isNullOrBlank()) {
                 return false
             }
             return EmailValidator().run {
@@ -41,7 +41,7 @@ enum class TipoDeChave {
         }
     },
     ALEATORIA {
-        override fun valida(chave: String?) = chave == null || chave.isBlank() // não deve se preenchida
+        override fun valida(chave: String?) = chave.isNullOrBlank() // não deve se preenchida
     };
 
     abstract fun valida(chave: String?): Boolean

@@ -1,11 +1,8 @@
 package br.com.zup.edu.integration.bcb
 
 
+import br.com.zup.edu.pix.*
 import br.com.zup.edu.pix.carrega.ChavePixInfo
-import br.com.zup.edu.pix.ChavePix
-import br.com.zup.edu.pix.ContaAssociada
-import br.com.zup.edu.pix.TipoDeChave
-import br.com.zup.edu.pix.TipoDeConta
 import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.http.annotation.*
@@ -94,7 +91,7 @@ data class PixKeyDetailsResponse (
                     BankAccount.AccountType.SVGS -> TipoDeConta.CONTA_POUPANCA
                 },
             conta = ContaAssociada(
-                instituicao = bankAccount.participant,
+                instituicao = Instituicoes.nome(bankAccount.participant),
                 nomeDoTitular = owner.name,
                 cpfDoTitular = owner.taxIdNumber,
                 agencia = bankAccount.branch,

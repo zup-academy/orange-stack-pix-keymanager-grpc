@@ -1,0 +1,15 @@
+name: Mirroring
+
+on: [push, delete]
+
+jobs:
+
+  to_codecommit:                                        
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v1
+      - uses: spyoungtech/mirror-action@master
+        with:
+          REMOTE: 'https://git-codecommit.sa-east-1.amazonaws.com/v1/repos/orange-stack-pix-keymanager-grpc'
+          GIT_USERNAME: ${{ secrets.GIT_USERNAME }}
+          GIT_PASSWORD: ${{ secrets.GIT_PASSWORD }}

@@ -1,0 +1,58 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - curl -o /bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.16.0/bin/linux/amd64/kubectl
+      - curl -sS -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
+      - wget -qO- https://get.helm.sh/helm-v3.5.2-linux-amd64.tar.gz | tar xvz
+      - mv linux-amd64/helm /bin/helm
+      - chmod +x /bin/kubectl /bin/helm ./aws-iam-authenticator
+      - export PATH=$PWD/:$PATH
+      - apt-get update && apt-get -y install jq python3-pip python3-dev && pip3 install --upgrade awscli
+
+  pre_build:
+    commands:
+      - echo connecting ecr
+      - $(aws ecr get-login --no-include-email --region $DEFAULT_REGION)
+      #- $(aws ecr-public get-login-password --region $DEFAULT_REGION | docker login --username AWS --password-stdin public.ecr.aws/d8b2x5c9)
+      - mvn clean install
+      - echo exporting kubeconfig
+      - export KUBECONFIG=$HOME/.kube/config
+      
+  build:
+    commands:
+      - IMAGE_REPO_NAME="$DEPLOYMENT_NAME"
+      - AWS_ACCOUNT_ID="$ACCOUNT_ID"
+      - AWS_DEFAULT_REGION="$DEFAULT_REGION"
+      - IMAGE_TAG="$IMAGE_TAG"
+      - echo Build started on `date`
+      - echo Building the Docker image...  
+      - docker image ls
+      - docker build -t $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG .
+      - docker image ls
+      - echo Build completed on `date`  
+
+  post_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - echo Push completed on `date`  
+      - echo deploying to cluster...
+      - helm version --short
+      - helm lint pipeline/helm/$DEPLOYMENT_NAME --values pipeline/helm/$DEPLOYMENT_NAME/values.yaml
+      - aws eks update-kubeconfig --name $EKS_CLUSTER_NAME --role-arn $ARN_ROLE
+      - kubectl get nodes
+      - helm upgrade -i $DEPLOYMENT_NAME pipeline/helm/$DEPLOYMENT_NAME/ --values pipeline/helm/$DEPLOYMENT_NAME/values.yaml
+
+# envs
+# IMAGE_REPO_NAME = DEPLOYMENT_NAME
+# ACCOUNT_ID = 494166765558
+# REPO_NAME = orange-stack-sat-bcb-pix
+# DEFAULT_REGION = sa-east-1
+# IMAGE_TAG = latest
+# EKS_CLUSTER_NAME = zup-academy
+# EKS_KUBECTL_ROLE_ARN
+# DEPLOYMENT_NAME orange-stack-sat-bcb-pix
+#ARN_ROLE = arn:aws:iam::494166765558:role/zupacademyCodebuildKubectl
+# URL_REPO = public.ecr.aws/d8b2x5c9

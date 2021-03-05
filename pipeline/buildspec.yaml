@@ -16,7 +16,7 @@ phases:
       - echo connecting ecr
       - $(aws ecr get-login --no-include-email --region $DEFAULT_REGION)
       #- $(aws ecr-public get-login-password --region $DEFAULT_REGION | docker login --username AWS --password-stdin public.ecr.aws/d8b2x5c9)
-      - mvn clean install
+      - gradle build
       - echo exporting kubeconfig
       - export KUBECONFIG=$HOME/.kube/config
       

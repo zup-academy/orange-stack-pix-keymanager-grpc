@@ -10,12 +10,12 @@ grpc:
 
 datasources:
   default:
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: ${DB_URI:jdbc:postgresql://localhost:5432/postgres}
     driverClassName: org.postgresql.Driver
-    username: postgres
-    password: changeme
+    username: ${DB_USER:postgres}
+    password: ${DB_PASSWORD:changeme}
     schema-generate: CREATE_DROP
-    dialect: POSTGRES
+    dialect: ${DB_DIALECT:POSTGRES}
 
 jpa.default.properties.hibernate.hbm2ddl.auto: update
 jpa.default.properties.hibernate.show_sql: true

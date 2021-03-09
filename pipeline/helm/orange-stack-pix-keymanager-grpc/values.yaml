@@ -77,3 +77,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+application:
+  DB_URI: 
+  DB_USER:
+  DB_PASSWORD:
+  DB_DIALECT:

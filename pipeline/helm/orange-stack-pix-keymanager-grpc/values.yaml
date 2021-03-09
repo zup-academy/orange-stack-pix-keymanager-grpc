@@ -79,7 +79,9 @@ tolerations: []
 affinity: {}
 
 application:
-  DB_URI: 
-  DB_USER:
-  DB_PASSWORD:
-  DB_DIALECT:
+  DB_URI: jdbc:postgresql://zup-academy.cepveptihzwe.sa-east-1.rds.amazonaws.com:5432/keymanager_grpc_db
+  DB_USER: keymanager_grpc_user
+  DB_PASSWORD: Ym9RU07srXCM3jX3
+  DB_DIALECT: POSTGRES
+
+

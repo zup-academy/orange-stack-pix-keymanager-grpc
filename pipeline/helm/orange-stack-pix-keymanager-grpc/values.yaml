@@ -83,8 +83,8 @@ application:
   DB_USER: keymanager_grpc_user
   DB_PASSWORD: Ym9RU07srXCM3jX3
   DB_DIALECT: POSTGRES
-  ITAU_URL: internal-a0056f1bc61dd472ab8af70597036b6c-721953980.sa-east-1.elb.amazonaws.com
-  BCB_URL: internal-abfe0883c77dd427ab0997441a62306b-1365683537.sa-east-1.elb.amazonaws.com
+  ITAU_URL: http://internal-a0056f1bc61dd472ab8af70597036b6c-721953980.sa-east-1.elb.amazonaws.com
+  BCB_URL: http://internal-abfe0883c77dd427ab0997441a62306b-1365683537.sa-east-1.elb.amazonaws.com
 
 
 

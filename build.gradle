@@ -42,6 +42,13 @@ dependencies {
     runtimeOnly("ch.qos.logback:logback-classic")
     runtimeOnly("com.fasterxml.jackson.module:jackson-module-kotlin")
     runtimeOnly("org.postgresql:postgresql")
+    /**
+     * Test dependencies
+     */
+    kaptTest "io.micronaut:micronaut-inject-java"
+    testImplementation("org.mockito:mockito-core")
+    testImplementation("com.h2database:h2")
+
     testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
     testImplementation("org.testcontainers:postgresql")

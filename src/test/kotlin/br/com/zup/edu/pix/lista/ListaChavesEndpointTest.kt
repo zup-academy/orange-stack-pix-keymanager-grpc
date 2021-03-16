@@ -90,9 +90,9 @@ internal class ListaChavesEndpointTest(
 
         // ação
         val thrown = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
-            val response = grpcClient.lista(ListaChavesPixRequest.newBuilder()
-                .setClienteId(clienteIdInvalido)
-                .build())
+            grpcClient.lista(ListaChavesPixRequest.newBuilder()
+                                .setClienteId(clienteIdInvalido)
+                                .build())
         }
 
         // validação

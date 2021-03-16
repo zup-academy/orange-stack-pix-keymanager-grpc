@@ -61,10 +61,10 @@ internal class RemoveChaveEndpointTest {
 
         // ação
         val thrown = assertThrows<StatusRuntimeException> {
-            val response = grpcClient.remove(RemoveChavePixRequest.newBuilder()
-                                                            .setPixId(pixId)
-                                                            .setClienteId(clienteId)
-                                                            .build())
+            grpcClient.remove(RemoveChavePixRequest.newBuilder()
+                                        .setPixId(pixId)
+                                        .setClienteId(clienteId)
+                                        .build())
         }
 
         // validação

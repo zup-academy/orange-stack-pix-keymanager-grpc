@@ -11,6 +11,9 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.hamcrest.MatcherAssert
+import org.hamcrest.Matchers.containsInAnyOrder
+import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -52,15 +55,20 @@ internal class ListaChavesEndpointTest(
 
         // validação
         with (response.chavesList) {
-            assertEquals(2, size)
-            this.map { Pair(it.tipo, it.chave) }
-                .containsAll(listOf(
+            MatcherAssert.assertThat(this, hasSize(2))
+            MatcherAssert.assertThat(
+                this.map { Pair(it.tipo, it.chave) }.toList(),
+                containsInAnyOrder(
                     Pair(br.com.zup.edu.grpc.TipoDeChave.ALEATORIA, "randomkey-3"),
                     Pair(br.com.zup.edu.grpc.TipoDeChave.EMAIL, "rafael.ponte@zup.com.br")
-                ))
+                )
+            )
         }
     }
 
+    /**
+     * XXX: será que precisamos disso dado que não existe branch na query?
+     */
     @Test
     fun `nao deve listar as chaves do cliente quando cliente nao possuir chaves`() {
         // cenário

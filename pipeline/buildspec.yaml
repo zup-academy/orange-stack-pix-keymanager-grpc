@@ -15,7 +15,7 @@ phases:
     commands:
       - echo connecting ecr
       - docker login -u AWS -p $(aws ecr-public get-login-password --region us-east-1) $URL_REPO
-      - gradle build
+      - sh gradlew build -x test
       - echo exporting kubeconfig
       - export KUBECONFIG=$HOME/.kube/config
       

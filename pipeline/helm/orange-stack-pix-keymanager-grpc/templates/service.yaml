@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   name: {{ include "orange-stack-pix-keymanager-grpc.fullname" . }}
-  annotations:
-    service.beta.kubernetes.io/aws-load-balancer-internal: "true"
+  #annotations:
+  #  service.beta.kubernetes.io/aws-load-balancer-internal: "true"
   labels:
     {{- include "orange-stack-pix-keymanager-grpc.labels" . | nindent 4 }}
 spec:

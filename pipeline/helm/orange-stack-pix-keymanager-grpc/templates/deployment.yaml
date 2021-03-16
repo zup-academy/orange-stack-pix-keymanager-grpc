@@ -37,14 +37,19 @@ spec:
             - name: http
               containerPort: 50051
               protocol: TCP
-          livenessProbe:
-            httpGet:
-              path: /
-              port: http
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
+          #livenessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          #readinessProbe:
+          #  httpGet:
+          #    path: /
+          #    port: http
+          envFrom:
+            - configMapRef:
+                name: orange-stack-pix-keymanager-grpc-configmap
+            - secretRef:
+                name: orange-stack-pix-keymanager-grpc-secrets
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}

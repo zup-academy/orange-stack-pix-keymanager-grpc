@@ -9,9 +9,13 @@ import br.com.zup.edu.integration.itau.ContasDeClientesNoItauClient
 import br.com.zup.edu.integration.itau.DadosDaContaResponse
 import br.com.zup.edu.integration.itau.InstituicaoResponse
 import br.com.zup.edu.integration.itau.TitularResponse
+import br.com.zup.edu.pix.ChavePix
 import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.pix.ContaAssociada
+import br.com.zup.edu.pix.lista.ListaChavesEndpointTest
 import io.grpc.ManagedChannel
+import io.grpc.Status
+import io.grpc.StatusRuntimeException
 import io.micronaut.context.annotation.Bean
 import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
@@ -23,6 +27,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import org.mockito.Mockito
 import org.mockito.Mockito.`when`
 import java.time.LocalDateTime
@@ -77,6 +82,32 @@ internal class RegistraChaveEndpointTest(
         }
     }
 
+    @Test
+    fun `nao deve registrar chave pix quando chave existente`() {
+        // cenário
+        repository.save(chave(
+            tipo = br.com.zup.edu.pix.TipoDeChave.CPF,
+            chave = "63657520325",
+            clienteId = ListaChavesEndpointTest.CLIENTE_ID
+        ))
+
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(RegistraChavePixRequest.newBuilder()
+                                                .setClienteId(CLIENTE_ID.toString())
+                                                .setTipoDeChave(TipoDeChave.CPF)
+                                                .setChave("63657520325")
+                                                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                                                .build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.ALREADY_EXISTS.code, status.code)
+            assertEquals("Chave Pix '63657520325' existente", status.description)
+        }
+    }
+
     private fun dadosDaContaResponse(): DadosDaContaResponse {
         return DadosDaContaResponse(
             tipo = "CONTA_CORRENTE",
@@ -120,6 +151,26 @@ internal class RegistraChaveEndpointTest(
             type = Owner.OwnerType.NATURAL_PERSON,
             name = "Rafael Ponte",
             taxIdNumber = "63657520325"
+        )
+    }
+
+    private fun chave(
+        tipo: br.com.zup.edu.pix.TipoDeChave,
+        chave: String = UUID.randomUUID().toString(),
+        clienteId: UUID = UUID.randomUUID(),
+    ): ChavePix {
+        return ChavePix(
+            clienteId = clienteId,
+            tipo = tipo,
+            chave = chave,
+            tipoDeConta = br.com.zup.edu.pix.TipoDeConta.CONTA_CORRENTE,
+            conta = ContaAssociada(
+                instituicao = "UNIBANCO ITAU",
+                nomeDoTitular = "Rafael Ponte",
+                cpfDoTitular = "63657520325",
+                agencia = "1218",
+                numeroDaConta = "291900"
+            )
         )
     }
 

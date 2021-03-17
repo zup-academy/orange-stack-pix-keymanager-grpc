@@ -108,6 +108,70 @@ internal class RegistraChaveEndpointTest(
         }
     }
 
+    @Test
+    fun `nao deve registrar chave pix quando nao encontrar dados da conta cliente`() {
+        // cenário
+        `when`(itauClient.buscaContaPorTipo(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.notFound())
+
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(RegistraChavePixRequest.newBuilder()
+                                                .setClienteId(CLIENTE_ID.toString())
+                                                .setTipoDeChave(TipoDeChave.EMAIL)
+                                                .setChave("rponte@gmail.com")
+                                                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                                                .build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Cliente não encontrado no Itau", status.description)
+        }
+    }
+
+    @Test
+    fun `nao deve registrar chave pix quando nao for possivel registrar chave no BCB`() {
+        // cenário
+        `when`(itauClient.buscaContaPorTipo(clienteId = CLIENTE_ID.toString(), tipo = "CONTA_CORRENTE"))
+            .thenReturn(HttpResponse.ok(dadosDaContaResponse()))
+
+        `when`(bcbClient.create(createPixKeyRequest()))
+            .thenReturn(HttpResponse.badRequest())
+
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(RegistraChavePixRequest.newBuilder()
+                                                .setClienteId(CLIENTE_ID.toString())
+                                                .setTipoDeChave(TipoDeChave.EMAIL)
+                                                .setChave("rponte@gmail.com")
+                                                .setTipoDeConta(TipoDeConta.CONTA_CORRENTE)
+                                                .build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.FAILED_PRECONDITION.code, status.code)
+            assertEquals("Erro ao registrar chave Pix no Banco Central do Brasil (BCB)", status.description)
+        }
+    }
+
+    @Test
+    fun `nao deve registrar chave pix quando parametros forem invalidos`() {
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(RegistraChavePixRequest.newBuilder().build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+            assertEquals("Dados inválidos", status.description)
+            // TODO: extrair e validar os detalhes do erro (violations)
+        }
+    }
+
     private fun dadosDaContaResponse(): DadosDaContaResponse {
         return DadosDaContaResponse(
             tipo = "CONTA_CORRENTE",

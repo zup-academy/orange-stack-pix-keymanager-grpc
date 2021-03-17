@@ -58,6 +58,8 @@ internal class RegistraChaveEndpointTest(
         repository.deleteAll()
     }
 
+    // TODO: escrever cenários de exceptions na chamada do serviços satelites?
+
     @Test
     fun `deve registrar nova chave pix`() {
         // cenário

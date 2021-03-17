@@ -24,7 +24,7 @@ import java.util.*
 import javax.inject.Inject
 
 /**
- * TIP: Microunaut ainda não suporte @Nested classes do jUnit5
+ * TIP: Microunaut ainda não suporta @Nested classes do jUnit5
  *  - https://github.com/micronaut-projects/micronaut-test/issues/56
  */
 @MicronautTest(transactional = false)
@@ -102,7 +102,28 @@ internal class CarregaChaveEndpointTest(
     }
 
     @Test
-    fun `deve carregar chave por valor da chave quando registro existente localmente`() {
+    fun `nao deve carregar chave por pixId e clienteId quando registro nao existir`() {
+        // ação
+        val pixIdNaoExistente = UUID.randomUUID().toString()
+        val clienteIdNaoExistente = UUID.randomUUID().toString()
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.carrega(CarregaChavePixRequest.newBuilder()
+                                            .setPixId(FiltroPorPixId.newBuilder()
+                                                .setPixId(pixIdNaoExistente)
+                                                .setClienteId(clienteIdNaoExistente)
+                                                .build()
+                                            ).build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave Pix não encontrada", status.description)
+        }
+    }
+
+    @Test
+    fun `deve carregar chave por valor da chave quando registro existir localmente`() {
         // cenário
         val chaveExistente = repository.findByChave("rafael.ponte@zup.com.br").get()
 
@@ -121,7 +142,7 @@ internal class CarregaChaveEndpointTest(
     }
 
     @Test
-    fun `deve carregar chave por valor da chave quando registro nao existir localmente`() {
+    fun `deve carregar chave por valor da chave quando registro nao existir localmente mas existir no BCB`() {
         // cenário
         val bcbResponse = pixKeyDetailsResponse()
         Mockito.`when`(bcbClient.findByKey(key = "user.from.another.bank@santander.com.br"))
@@ -138,6 +159,26 @@ internal class CarregaChaveEndpointTest(
             assertEquals("", this.clienteId)
             assertEquals(bcbResponse.keyType.name, this.chave.tipo.name)
             assertEquals(bcbResponse.key, this.chave.chave)
+        }
+    }
+
+    @Test
+    fun `nao deve carregar chave por valor da chave quando registro nao existir localmente nem no BCB`() {
+        // cenário
+        Mockito.`when`(bcbClient.findByKey(key = "not.existing.user@santander.com.br"))
+            .thenReturn(HttpResponse.notFound())
+
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.carrega(CarregaChavePixRequest.newBuilder()
+                                    .setChave("not.existing.user@santander.com.br")
+                                    .build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.NOT_FOUND.code, status.code)
+            assertEquals("Chave Pix não encontrada", status.description)
         }
     }
 

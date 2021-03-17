@@ -23,6 +23,10 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
+/**
+ * TIP: Microunaut ainda não suporte @Nested classes do jUnit5
+ *  - https://github.com/micronaut-projects/micronaut-test/issues/56
+ */
 @MicronautTest(transactional = false)
 internal class CarregaChaveEndpointTest(
     val repository: ChavePixRepository,

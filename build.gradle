@@ -49,10 +49,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core")
     testImplementation("com.h2database:h2")
     testImplementation("org.hamcrest:hamcrest-core:2.2")
-
-    testImplementation("org.testcontainers:testcontainers")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
 }
 
 

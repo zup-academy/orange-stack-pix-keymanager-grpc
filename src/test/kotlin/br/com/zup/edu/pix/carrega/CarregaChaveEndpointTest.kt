@@ -78,6 +78,26 @@ internal class CarregaChaveEndpointTest(
     }
 
     @Test
+    fun `nao deve carregar chave por pixId e clienteId quando filtro invalido`() {
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.carrega(CarregaChavePixRequest.newBuilder()
+                                            .setPixId(FiltroPorPixId.newBuilder()
+                                                .setPixId("")
+                                                .setClienteId("")
+                                                .build()
+                                            ).build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+            assertEquals("Dados inválidos", status.description)
+            // TODO: extrair e validar os detalhes do erro (violations)
+        }
+    }
+
+    @Test
     fun `deve carregar chave por valor da chave quando registro existente localmente`() {
         // cenário
         val chaveExistente = repository.findByChave("rafael.ponte@zup.com.br").get()
@@ -114,6 +134,21 @@ internal class CarregaChaveEndpointTest(
             assertEquals("", this.clienteId)
             assertEquals(bcbResponse.keyType.name, this.chave.tipo.name)
             assertEquals(bcbResponse.key, this.chave.chave)
+        }
+    }
+
+    @Test
+    fun `nao deve carregar chave por valor da chave quando filtro invalido`() {
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.carrega(CarregaChavePixRequest.newBuilder().setChave("").build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+            assertEquals("Dados inválidos", status.description)
+            // TODO: extrair e validar os detalhes do erro (violations)
         }
     }
 

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.util.*
 
 /**
@@ -98,14 +99,14 @@ internal class ListaChavesEndpointTest(
         val clienteIdInvalido = ""
 
         // ação
-        val thrown = org.junit.jupiter.api.assertThrows<StatusRuntimeException> {
+        val thrown = assertThrows<StatusRuntimeException> {
             grpcClient.lista(ListaChavesPixRequest.newBuilder()
                                 .setClienteId(clienteIdInvalido)
                                 .build())
         }
 
         // validação
-        with (thrown) {
+        with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Cliente ID não pode ser nulo ou vazio", status.description)
         }

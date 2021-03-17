@@ -20,7 +20,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.util.*
 
-@MicronautTest
+/**
+ * TIP: Necessario desabilitar o controle transacional (transactional=false) pois o gRPC Server
+ * roda numa thread separada, caso contrário não será possível preparar cenário dentro do método @Test
+ */
+@MicronautTest(transactional = false)
 internal class ListaChavesEndpointTest(
     val repository: ChavePixRepository,
     val grpcClient: KeymanagerListaGrpcServiceGrpc.KeymanagerListaGrpcServiceBlockingStub,
@@ -30,6 +34,9 @@ internal class ListaChavesEndpointTest(
         val CLIENTE_ID = UUID.randomUUID()
     }
 
+    /**
+     * TIP: por padrão roda numa transação isolada
+     */
     @BeforeEach
     fun setup() {
         repository.save(chave(tipo = TipoDeChave.EMAIL, chave = "rafael.ponte@zup.com.br", clienteId = CLIENTE_ID))
@@ -37,6 +44,9 @@ internal class ListaChavesEndpointTest(
         repository.save(chave(tipo = TipoDeChave.ALEATORIA, chave = "randomkey-3", clienteId = CLIENTE_ID))
     }
 
+    /**
+     * TIP: por padrão roda numa transação isolada
+     */
     @AfterEach
     fun cleanUp() {
         repository.deleteAll()
@@ -46,7 +56,6 @@ internal class ListaChavesEndpointTest(
     fun `deve listar todas as chaves do cliente`() {
         // cenário
         val clienteId = CLIENTE_ID.toString()
-        // FIXME: inserir chaves aqui não funciona, ao que tudo indica o repository usa uma conexão diferente, mesmo com @Transactional
 
         // ação
         val response = grpcClient.lista(ListaChavesPixRequest.newBuilder()

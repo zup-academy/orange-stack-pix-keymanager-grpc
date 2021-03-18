@@ -7,119 +7,108 @@ import org.junit.jupiter.api.Test
 internal class TipoDeChaveTest {
 
     @Nested
-    inner class ChaveAleatoriaTest {
+    inner class ALEATORIA {
 
         @Test
         fun `deve ser valido quando chave aleatoria for nula ou vazia`() {
-
-            val tipoDechave = TipoDeChave.ALEATORIA
-
-            assertTrue(tipoDechave.valida(null))
-            assertTrue(tipoDechave.valida(""))
+            with(TipoDeChave.ALEATORIA) {
+                assertTrue(valida(null))
+                assertTrue(valida(""))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando chave aleatoria possuir um valor`() {
-
-            val tipoDechave = TipoDeChave.ALEATORIA
-
-            assertFalse(tipoDechave.valida("um valor qualquer"))
+            with(TipoDeChave.ALEATORIA) {
+                assertFalse(valida("um valor qualquer"))
+            }
         }
     }
 
     @Nested
-    inner class CpfTest {
+    inner class CPF {
 
         @Test
         fun `deve ser valido quando cpf for um numero valido`() {
-
-            val tipoDechave = TipoDeChave.CPF
-
-            assertTrue(tipoDechave.valida("35060731332"))
+            with(TipoDeChave.CPF) {
+                assertTrue(valida("35060731332"))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando cpf for um numero invalido`() {
-
-            val tipoDechave = TipoDeChave.CPF
-
-            assertFalse(tipoDechave.valida("35060731331"))
+            with(TipoDeChave.CPF) {
+                assertFalse(valida("35060731331"))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando cpf nao for informado`() {
-
-            val tipoDechave = TipoDeChave.CPF
-
-            assertFalse(tipoDechave.valida(null))
-            assertFalse(tipoDechave.valida(""))
+            with(TipoDeChave.CPF) {
+                assertFalse(valida(null))
+                assertFalse(valida(""))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando cpf possuir letras`() {
-
-            val tipoDechave = TipoDeChave.CPF
-            assertFalse(tipoDechave.valida("3506073133a"))
+            with(TipoDeChave.CPF) {
+                assertFalse(valida("3506073133a"))
+            }
         }
     }
 
     @Nested
-    inner class CelularTest {
+    inner class CELULAR {
 
         @Test
         fun `deve ser valido quando celular for um numero valido`() {
-
-            val tipoDechave = TipoDeChave.CELULAR
-
-            assertTrue(tipoDechave.valida("+5511987654321"))
+            with(TipoDeChave.CELULAR) {
+                assertTrue(valida("+5511987654321"))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando celular for um numero invalido`() {
-
-            val tipoDechave = TipoDeChave.CELULAR
-
-            assertFalse(tipoDechave.valida("11987654321"))
-            assertFalse(tipoDechave.valida("+55a11987654321"))
+            with(TipoDeChave.CELULAR) {
+                assertFalse(valida("11987654321"))
+                assertFalse(valida("+55a11987654321"))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando celular for um numero nao for informado`() {
-
-            val tipoDechave = TipoDeChave.CELULAR
-
-            assertFalse(tipoDechave.valida(null))
-            assertFalse(tipoDechave.valida(""))
+            with(TipoDeChave.CELULAR) {
+                assertFalse(valida(null))
+                assertFalse(valida(""))
+            }
         }
     }
 
     @Nested
-    inner class EmailTest {
+    inner class EMAIL {
 
         @Test
         fun `deve ser valido quando email for endereco valido`() {
-
-            val tipoDechave = TipoDeChave.EMAIL
-
-            assertTrue(tipoDechave.valida("zup.edu@zup.com.br"))
+            with(TipoDeChave.EMAIL) {
+                assertTrue(valida("zup.edu@zup.com.br"))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando email estiver em um formato invalido`() {
-
-            val tipoDechave = TipoDeChave.EMAIL
-
-            assertFalse(tipoDechave.valida("zup.eduzup.com.br"))
-            assertFalse(tipoDechave.valida("zup.edu@zup.com."))
+            with(TipoDeChave.EMAIL) {
+                assertFalse(valida("zup.eduzup.com.br"))
+                assertFalse(valida("zup.edu@zup.com."))
+            }
         }
 
         @Test
         fun `nao deve ser valido quando email nao for informado`() {
-
-            val tipoDechave = TipoDeChave.EMAIL
-
-            assertFalse(tipoDechave.valida(null))
-            assertFalse(tipoDechave.valida(""))
+            with(TipoDeChave.EMAIL) {
+                assertFalse(valida(null))
+                assertFalse(valida(""))
+            }
         }
     }
 }

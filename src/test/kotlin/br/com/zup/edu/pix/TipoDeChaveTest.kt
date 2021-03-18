@@ -54,6 +54,13 @@ internal class TipoDeChaveTest {
             assertFalse(tipoDechave.valida(null))
             assertFalse(tipoDechave.valida(""))
         }
+
+        @Test
+        fun `nao deve ser valido quando cpf possuir letras`() {
+
+            val tipoDechave = TipoDeChave.CPF
+            assertFalse(tipoDechave.valida("3506073133a"))
+        }
     }
 
     @Nested

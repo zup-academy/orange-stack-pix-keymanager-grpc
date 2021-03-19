@@ -5,7 +5,7 @@ import io.grpc.Status
 import io.grpc.StatusRuntimeException
 import io.grpc.protobuf.StatusProto
 
-interface ExceptionHandler<E : Exception> {
+interface ExceptionHandler<in E : Exception> {
 
     /**
      * Handles exception and maps it to StatusWithDetails

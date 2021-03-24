@@ -12,7 +12,6 @@ import br.com.zup.edu.integration.itau.TitularResponse
 import br.com.zup.edu.pix.ChavePix
 import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.pix.ContaAssociada
-import br.com.zup.edu.pix.lista.ListaChavesEndpointTest
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -90,7 +89,7 @@ internal class RegistraChaveEndpointTest(
         repository.save(chave(
             tipo = br.com.zup.edu.pix.TipoDeChave.CPF,
             chave = "63657520325",
-            clienteId = ListaChavesEndpointTest.CLIENTE_ID
+            clienteId = CLIENTE_ID
         ))
 
         // ação
@@ -174,6 +173,24 @@ internal class RegistraChaveEndpointTest(
         }
     }
 
+    @MockBean(BancoCentralClient::class)
+    fun bcbClient(): BancoCentralClient? {
+        return Mockito.mock(BancoCentralClient::class.java)
+    }
+
+    @MockBean(ContasDeClientesNoItauClient::class)
+    fun itauClient(): ContasDeClientesNoItauClient? {
+        return Mockito.mock(ContasDeClientesNoItauClient::class.java)
+    }
+
+    @Factory
+    class Clients  {
+        @Bean
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerRegistraGrpcServiceGrpc.KeymanagerRegistraGrpcServiceBlockingStub? {
+            return KeymanagerRegistraGrpcServiceGrpc.newBlockingStub(channel)
+        }
+    }
+
     private fun dadosDaContaResponse(): DadosDaContaResponse {
         return DadosDaContaResponse(
             tipo = "CONTA_CORRENTE",
@@ -238,24 +255,6 @@ internal class RegistraChaveEndpointTest(
                 numeroDaConta = "291900"
             )
         )
-    }
-
-    @MockBean(BancoCentralClient::class)
-    fun bcbClient(): BancoCentralClient? {
-        return Mockito.mock(BancoCentralClient::class.java)
-    }
-
-    @MockBean(ContasDeClientesNoItauClient::class)
-    fun itauClient(): ContasDeClientesNoItauClient? {
-        return Mockito.mock(ContasDeClientesNoItauClient::class.java)
-    }
-
-    @Factory
-    class Clients  {
-        @Bean
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerRegistraGrpcServiceGrpc.KeymanagerRegistraGrpcServiceBlockingStub? {
-            return KeymanagerRegistraGrpcServiceGrpc.newBlockingStub(channel)
-        }
     }
 
 }

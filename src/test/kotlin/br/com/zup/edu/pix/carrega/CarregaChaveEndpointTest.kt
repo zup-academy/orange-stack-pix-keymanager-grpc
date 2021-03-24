@@ -18,7 +18,8 @@ import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.mockito.Mockito
+import org.mockito.Mockito.`when`
+import org.mockito.Mockito.mock
 import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
@@ -145,12 +146,12 @@ internal class CarregaChaveEndpointTest(
     fun `deve carregar chave por valor da chave quando registro nao existir localmente mas existir no BCB`() {
         // cenário
         val bcbResponse = pixKeyDetailsResponse()
-        Mockito.`when`(bcbClient.findByKey(key = "user.from.another.bank@santander.com.br"))
+        `when`(bcbClient.findByKey(key = "user.from.another.bank@santander.com.br"))
             .thenReturn(HttpResponse.ok(pixKeyDetailsResponse()))
 
         // ação
         val response = grpcClient.carrega(CarregaChavePixRequest.newBuilder()
-                                    .setChave(bcbResponse.key)
+                                    .setChave("user.from.another.bank@santander.com.br")
                                     .build())
 
         // validação
@@ -165,7 +166,7 @@ internal class CarregaChaveEndpointTest(
     @Test
     fun `nao deve carregar chave por valor da chave quando registro nao existir localmente nem no BCB`() {
         // cenário
-        Mockito.`when`(bcbClient.findByKey(key = "not.existing.user@santander.com.br"))
+        `when`(bcbClient.findByKey(key = "not.existing.user@santander.com.br"))
             .thenReturn(HttpResponse.notFound())
 
         // ação
@@ -209,6 +210,20 @@ internal class CarregaChaveEndpointTest(
         with(thrown) {
             Assertions.assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             Assertions.assertEquals("Chave Pix inválida ou não informada", status.description)
+        }
+    }
+
+
+    @MockBean(BancoCentralClient::class)
+    fun bcbClient(): BancoCentralClient? {
+        return mock(BancoCentralClient::class.java)
+    }
+
+    @Factory
+    class Clients  {
+        @Bean
+        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerCarregaGrpcServiceGrpc.KeymanagerCarregaGrpcServiceBlockingStub? {
+            return KeymanagerCarregaGrpcServiceGrpc.newBlockingStub(channel)
         }
     }
 
@@ -257,19 +272,6 @@ internal class CarregaChaveEndpointTest(
             name = "Another User",
             taxIdNumber = "12345678901"
         )
-    }
-
-    @MockBean(BancoCentralClient::class)
-    fun bcbClient(): BancoCentralClient? {
-        return Mockito.mock(BancoCentralClient::class.java)
-    }
-
-    @Factory
-    class Clients  {
-        @Bean
-        fun blockingStub(@GrpcChannel(GrpcServerChannel.NAME) channel: ManagedChannel): KeymanagerCarregaGrpcServiceGrpc.KeymanagerCarregaGrpcServiceBlockingStub? {
-            return KeymanagerCarregaGrpcServiceGrpc.newBlockingStub(channel)
-        }
     }
 
 }

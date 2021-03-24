@@ -11,7 +11,7 @@ import io.micronaut.context.annotation.Factory
 import io.micronaut.grpc.annotation.GrpcChannel
 import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
-import org.hamcrest.MatcherAssert
+import org.hamcrest.MatcherAssert.assertThat
 import org.hamcrest.Matchers.containsInAnyOrder
 import org.hamcrest.Matchers.hasSize
 import org.junit.jupiter.api.AfterEach
@@ -65,8 +65,8 @@ internal class ListaChavesEndpointTest(
 
         // validação
         with (response.chavesList) {
-            MatcherAssert.assertThat(this, hasSize(2))
-            MatcherAssert.assertThat(
+            assertThat(this, hasSize(2))
+            assertThat(
                 this.map { Pair(it.tipo, it.chave) }.toList(),
                 containsInAnyOrder(
                     Pair(br.com.zup.edu.grpc.TipoDeChave.ALEATORIA, "randomkey-3"),
@@ -94,7 +94,7 @@ internal class ListaChavesEndpointTest(
     }
 
     @Test
-    fun `nao deve listar todas as chaves do cliente quando clientId for invalido`() {
+    fun `nao deve listar todas as chaves do cliente quando clienteId for invalido`() {
         // cenário
         val clienteIdInvalido = ""
 

@@ -27,7 +27,7 @@ import java.time.LocalDateTime
 import java.util.*
 import javax.inject.Inject
 
-@MicronautTest
+@MicronautTest(transactional = false)
 internal class RemoveChaveEndpointTest(
     val repository: ChavePixRepository,
     val grpcClient: KeymanagerRemoveGrpcServiceGrpc.KeymanagerRemoveGrpcServiceBlockingStub,
@@ -68,8 +68,10 @@ internal class RemoveChaveEndpointTest(
                                                     .build())
 
         // validação
-        assertEquals(CHAVE_EXISTENTE.id.toString(), response.pixId)
-        assertEquals(CHAVE_EXISTENTE.clienteId.toString(), response.clienteId)
+        with(response) {
+            assertEquals(CHAVE_EXISTENTE.id.toString(), pixId)
+            assertEquals(CHAVE_EXISTENTE.clienteId.toString(), clienteId)
+        }
     }
 
     @Test
@@ -106,6 +108,7 @@ internal class RemoveChaveEndpointTest(
                                     .build())
         }
 
+        // validação
         with(thrown) {
             assertEquals(Status.NOT_FOUND.code, status.code)
             assertEquals("Chave Pix não encontrada ou não pertence ao cliente", status.description)
@@ -131,6 +134,21 @@ internal class RemoveChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.NOT_FOUND.code, status.code)
             assertEquals("Chave Pix não encontrada ou não pertence ao cliente", status.description)
+        }
+    }
+
+    @Test
+    fun `nao deve remover chave pix quando parametros inválidos`() {
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.remove(RemoveChavePixRequest.newBuilder().build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+            assertEquals("Dados inválidos", status.description)
+            // TODO: extrair e validar os detalhes do erro (violations)
         }
     }
 

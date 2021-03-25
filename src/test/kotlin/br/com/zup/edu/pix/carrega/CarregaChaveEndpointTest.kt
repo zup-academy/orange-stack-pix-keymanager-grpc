@@ -6,6 +6,7 @@ import br.com.zup.edu.grpc.KeymanagerCarregaGrpcServiceGrpc
 import br.com.zup.edu.integration.bcb.*
 import br.com.zup.edu.pix.*
 import br.com.zup.edu.pix.TipoDeChave.*
+import br.com.zup.edu.util.StatusRuntimeExceptionUtils.Companion.violationsFrom
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -16,6 +17,8 @@ import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.mockito.Mockito.`when`
@@ -98,7 +101,12 @@ internal class CarregaChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Dados inválidos", status.description)
-            // TODO: extrair e validar os detalhes do erro (violations)
+            assertThat(violationsFrom(this), containsInAnyOrder(
+                Pair("pixId", "must not be blank"),
+                Pair("clienteId", "must not be blank"),
+                Pair("pixId", "não é um formato válido de UUID"),
+                Pair("clienteId", "não é um formato válido de UUID"),
+            ))
         }
     }
 
@@ -194,7 +202,9 @@ internal class CarregaChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Dados inválidos", status.description)
-            // TODO: extrair e validar os detalhes do erro (violations)
+            assertThat(violationsFrom(this), containsInAnyOrder(
+                Pair("chave", "must not be blank"),
+            ))
         }
     }
 

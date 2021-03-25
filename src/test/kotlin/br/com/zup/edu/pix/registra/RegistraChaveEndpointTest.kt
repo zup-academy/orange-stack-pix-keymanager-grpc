@@ -12,6 +12,7 @@ import br.com.zup.edu.integration.itau.TitularResponse
 import br.com.zup.edu.pix.ChavePix
 import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.pix.ContaAssociada
+import br.com.zup.edu.util.StatusRuntimeExceptionUtils.Companion.violationsFrom
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -22,6 +23,8 @@ import io.micronaut.grpc.server.GrpcServerChannel
 import io.micronaut.http.HttpResponse
 import io.micronaut.test.annotation.MockBean
 import io.micronaut.test.extensions.junit5.annotation.MicronautTest
+import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers.containsInAnyOrder
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
@@ -169,7 +172,11 @@ internal class RegistraChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Dados inválidos", status.description)
-            // TODO: extrair e validar os detalhes do erro (violations)
+            assertThat(violationsFrom(this), containsInAnyOrder(
+                Pair("clienteId", "must not be blank"),
+                Pair("tipoDeConta", "must not be null"),
+                Pair("tipo", "must not be null"),
+            ))
         }
     }
 

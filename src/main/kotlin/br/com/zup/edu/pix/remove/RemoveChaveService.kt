@@ -21,8 +21,8 @@ class RemoveChaveService(@Inject val repository: ChavePixRepository, // 1
 
     @Transactional
     fun remove(
-        @NotBlank @ValidUUID(message = "cliente ID com formato inválido") clienteId: String?, // 1
-        @NotBlank @ValidUUID(message = "pix ID com formato inválido") pixId: String?,
+        @NotBlank @ValidUUID clienteId: String?, // 1
+        @NotBlank @ValidUUID pixId: String?,
     ) {
 
         val uuidPixId = UUID.fromString(pixId)

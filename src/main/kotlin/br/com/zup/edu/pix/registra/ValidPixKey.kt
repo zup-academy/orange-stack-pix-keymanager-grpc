@@ -31,8 +31,9 @@ class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, NovaChavePix> {
         context: ConstraintValidatorContext,
     ): Boolean {
 
+        // must be validated with @NotNull
         if (value?.tipo == null) {
-            return false
+            return true
         }
 
         return value.tipo.valida(value.chave)

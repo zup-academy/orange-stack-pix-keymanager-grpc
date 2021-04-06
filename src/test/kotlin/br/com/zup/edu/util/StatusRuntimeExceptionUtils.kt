@@ -15,7 +15,7 @@ class StatusRuntimeExceptionUtils {
                 .unpack(BadRequest::class.java)
 
             return details.fieldViolationsList
-                .map { Pair(it.field, it.description) }
+                .map { it.field to it.description } // same as Pair(it.field, it.description)
         }
 
     }

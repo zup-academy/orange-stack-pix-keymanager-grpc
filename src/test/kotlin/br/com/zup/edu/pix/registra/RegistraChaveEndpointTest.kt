@@ -12,7 +12,7 @@ import br.com.zup.edu.integration.itau.TitularResponse
 import br.com.zup.edu.pix.ChavePix
 import br.com.zup.edu.pix.ChavePixRepository
 import br.com.zup.edu.pix.ContaAssociada
-import br.com.zup.edu.util.StatusRuntimeExceptionUtils.Companion.violationsFrom
+import br.com.zup.edu.util.violations
 import io.grpc.ManagedChannel
 import io.grpc.Status
 import io.grpc.StatusRuntimeException
@@ -172,7 +172,7 @@ internal class RegistraChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Dados inválidos", status.description)
-            assertThat(violationsFrom(this), containsInAnyOrder(
+            assertThat(violations(), containsInAnyOrder(
                 Pair("clienteId", "must not be blank"),
                 Pair("clienteId", "não é um formato válido de UUID"),
                 Pair("tipoDeConta", "must not be null"),
@@ -202,7 +202,7 @@ internal class RegistraChaveEndpointTest(
         with(thrown) {
             assertEquals(Status.INVALID_ARGUMENT.code, status.code)
             assertEquals("Dados inválidos", status.description)
-            assertThat(violationsFrom(this), containsInAnyOrder(
+            assertThat(violations(), containsInAnyOrder(
                 Pair("chave", "chave Pix inválida (CPF)"),
             ))
         }

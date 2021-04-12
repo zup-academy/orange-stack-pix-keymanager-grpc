@@ -36,6 +36,15 @@ class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, NovaChavePix> {
             return true
         }
 
+        /**
+         * TODO: we could use Custom property paths here to associate this error to the field "chave"
+         * but it seems like Micronaut does not support it, so we'd have to add the dependency "micronaut-hibernate-validator"
+         * and uses the Bean Validation API directly
+         *
+         * - https://docs.micronaut.io/latest/guide/index.html#beanValidation
+         * - https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-custom-property-paths
+         */
+
         return value.tipo.valida(value.chave)
     }
 

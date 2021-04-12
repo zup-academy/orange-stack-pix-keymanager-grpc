@@ -174,8 +174,36 @@ internal class RegistraChaveEndpointTest(
             assertEquals("Dados inválidos", status.description)
             assertThat(violationsFrom(this), containsInAnyOrder(
                 Pair("clienteId", "must not be blank"),
+                Pair("clienteId", "não é um formato válido de UUID"),
                 Pair("tipoDeConta", "must not be null"),
                 Pair("tipo", "must not be null"),
+            ))
+        }
+    }
+
+    /**
+     * Cenário básico de validação de chave para garantir que estamos validando a
+     * chave via @ValidPixKey. Lembrando que os demais cenários são validados via testes
+     * de unidade.
+     */
+    @Test
+    fun `nao deve registrar chave pix quando parametros forem invalidos - chave invalida`() {
+        // ação
+        val thrown = assertThrows<StatusRuntimeException> {
+            grpcClient.registra(RegistraChavePixRequest.newBuilder()
+                                                .setClienteId(CLIENTE_ID.toString())
+                                                .setTipoDeChave(TipoDeChave.CPF)
+                                                .setChave("378.930.cpf-invalido.389-73")
+                                                .setTipoDeConta(TipoDeConta.CONTA_POUPANCA)
+                                                .build())
+        }
+
+        // validação
+        with(thrown) {
+            assertEquals(Status.INVALID_ARGUMENT.code, status.code)
+            assertEquals("Dados inválidos", status.description)
+            assertThat(violationsFrom(this), containsInAnyOrder(
+                Pair("chave", "chave Pix inválida (CPF)"),
             ))
         }
     }

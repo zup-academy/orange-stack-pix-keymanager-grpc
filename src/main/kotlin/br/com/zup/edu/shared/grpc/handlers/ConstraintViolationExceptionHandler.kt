@@ -19,7 +19,7 @@ class ConstraintViolationExceptionHandler : ExceptionHandler<ConstraintViolation
         val details = BadRequest.newBuilder()
             .addAllFieldViolations(e.constraintViolations.map {
                 BadRequest.FieldViolation.newBuilder()
-                    .setField(it.propertyPath.last().name ?: "key") // still thinking how to solve this case
+                    .setField(it.propertyPath.last().name ?: "chave") // still thinking how to solve this case (@ValidPixKey)
                     .setDescription(it.message)
                     .build()
             })

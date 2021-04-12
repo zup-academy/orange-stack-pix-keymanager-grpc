@@ -21,9 +21,43 @@ annotation class ValidPixKey(
     val payload: Array<KClass<Payload>> = [],
 )
 
-
+/**
+ * Using Bean Validation API because we wanted to use Custom property paths
+ * https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-custom-property-paths
+ */
 @Singleton
-class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, NovaChavePix> {
+class ValidPixKeyValidator: javax.validation.ConstraintValidator<ValidPixKey, NovaChavePix> {
+
+    override fun isValid(value: NovaChavePix?, context: javax.validation.ConstraintValidatorContext): Boolean {
+
+        // must be validated with @NotNull
+        if (value?.tipo == null) {
+            return true
+        }
+
+        val valid = value.tipo.valida(value.chave)
+        if (!valid) {
+            // https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-custom-property-paths
+            context.disableDefaultConstraintViolation()
+            context
+                .buildConstraintViolationWithTemplate(context.defaultConstraintMessageTemplate) // or "chave Pix inválida (${value.tipo})"
+                .addPropertyNode("chave").addConstraintViolation()
+        }
+
+        return valid
+    }
+}
+
+/**
+ * IT'S NOT USED HERE
+ *
+ * It seems like Micronaut does NOT support Custom property paths, so we have to use Bean Validation API
+ * directly instead
+ *
+ * - https://docs.micronaut.io/latest/guide/index.html#beanValidation
+ * - https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-custom-property-paths
+ */
+class ValidPixKeyValidatorUsingMicronautSupport: ConstraintValidator<ValidPixKey, NovaChavePix> {
 
     override fun isValid(
         value: NovaChavePix?,
@@ -35,15 +69,6 @@ class ValidPixKeyValidator: ConstraintValidator<ValidPixKey, NovaChavePix> {
         if (value?.tipo == null) {
             return true
         }
-
-        /**
-         * TODO: we could use Custom property paths here to associate this error to the field "chave"
-         * but it seems like Micronaut does not support it, so we'd have to add the dependency "micronaut-hibernate-validator"
-         * and uses the Bean Validation API directly
-         *
-         * - https://docs.micronaut.io/latest/guide/index.html#beanValidation
-         * - https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/#section-custom-property-paths
-         */
 
         return value.tipo.valida(value.chave)
     }

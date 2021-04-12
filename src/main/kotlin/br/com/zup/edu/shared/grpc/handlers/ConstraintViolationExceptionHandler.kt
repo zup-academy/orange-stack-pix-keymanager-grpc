@@ -19,7 +19,7 @@ class ConstraintViolationExceptionHandler : ExceptionHandler<ConstraintViolation
         val details = BadRequest.newBuilder()
             .addAllFieldViolations(e.constraintViolations.map {
                 BadRequest.FieldViolation.newBuilder()
-                    .setField(it.propertyPath.last().name ?: "chave") // needed due to class-level constraint in @ValidPixKey
+                    .setField(it.propertyPath.last().name ?: "?? key ??") // TODO: handle class-level constraint
                     .setDescription(it.message)
                     .build()
             })
